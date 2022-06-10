@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  db: 
+    image: '${DB_NAME}:${DB_VERSION}'
+    ports:
+      - '${DB_PORT}'
+    environment:
+      POSTGRES_USER: '${DB_USER}'
+      POSTGRES_PASSWORD: '${DB_PASSWORD}'
