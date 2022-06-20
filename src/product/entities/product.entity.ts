@@ -29,7 +29,7 @@ export class Product {
   category: Category;
 
   @ApiProperty({ minimum: 0 })
-  @Column('money')
+  @Column({ type: 'money', scale: 2 })
   price: number;
 
   @ApiProperty({ description: 'How many items of product is sold', minimum: 0 })

@@ -14,7 +14,7 @@ export class ProductService {
   ) {}
 
   create(createProductDto: CreateProductDto) {
-    return 'This action adds a new product';
+    return createProductDto;
   }
 
   findAll() {
