@@ -20,8 +20,11 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Get()
-  findAllProducts(@Query('category') category: string) {
-    return this.productService.findAllProducts(category);
+  findAllProducts(
+    @Query('category') category: string,
+    @Query('name') name: string,
+  ) {
+    return this.productService.findAllProducts(category, name);
   }
 
   @Get('categories')

@@ -18,7 +18,7 @@ export class ProductService {
     @InjectRepository(Photo) private photoRepository: Repository<Photo>,
   ) {}
 
-  async findAllProducts(category: string) {
+  async findAllProducts(category: string, name: string) {
     return await this.productRepository.find({
       select: {
         id: true,
@@ -35,6 +35,7 @@ export class ProductService {
         category: {
           name: category,
         },
+        name,
       },
     });
   }
