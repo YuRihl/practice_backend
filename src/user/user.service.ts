@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities';
 import * as bcrypt from 'bcrypt';
+import { ReturnUserDto } from './dto/return-user.dto';
 
 @Injectable()
 export class UserService {
@@ -15,9 +16,7 @@ export class UserService {
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
-    let user = await this.userRepository.findOneBy({ id });
-
+  async update(user: User, updateUserDto: UpdateUserDto) {
     const hashSalt = await bcrypt.genSalt();
 
     user = {
@@ -26,19 +25,16 @@ export class UserService {
       password: await bcrypt.hash(updateUserDto.password, hashSalt),
     };
 
-    const savedUser = await this.userRepository.save(user);
+    const { email, firstName, secondName }: ReturnUserDto =
+      await this.userRepository.save(user);
 
-    delete savedUser.password;
-
-    return savedUser;
+    return { email, firstName, secondName };
   }
 
-  async remove(id: number) {
-    const user = await this.userRepository.findOneBy({ id });
-    const deletedUser = await this.userRepository.remove(user);
+  async remove(user: User) {
+    const { email, firstName, secondName }: ReturnUserDto =
+      await this.userRepository.remove(user);
 
-    delete deletedUser.password;
-
-    return deletedUser;
+    return { email, firstName, secondName };
   }
 }

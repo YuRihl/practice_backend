@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -52,11 +53,9 @@ export class AuthService {
         email: userDto.email,
       });
 
-      console.log(createdUser);
-
       return this.signToken(createdUser.email, createdUser.id);
     } catch (error) {
-      console.error(error);
+      return new BadRequestException(error);
     }
   }
 

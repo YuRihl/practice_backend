@@ -97,14 +97,6 @@ export class ProductService {
     return newProduct;
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} product`;
-  }
-
   async createProductInfo(title: string, text: string) {
     const newProductInfo = await this.productInfoRepository.create({
       title,

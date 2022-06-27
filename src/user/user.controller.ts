@@ -13,7 +13,7 @@ import { User } from './entities';
 import { JwtGuard } from 'src/auth/guard';
 import { UserDecorator } from 'src/auth/decorator';
 
-@Controller('users')
+@Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -33,11 +33,8 @@ export class UserController {
   })
   @UseGuards(JwtGuard)
   @Patch('profile')
-  update(
-    @UserDecorator('id') id: number,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
-    return this.userService.update(id, updateUserDto);
+  update(@UserDecorator() user: User, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.update(user, updateUserDto);
   }
 
   @ApiOkResponse({
@@ -46,7 +43,7 @@ export class UserController {
   })
   @UseGuards(JwtGuard)
   @Delete('profile')
-  remove(@UserDecorator('id') id: number) {
-    return this.userService.remove(id);
+  remove(@UserDecorator() user: User) {
+    return this.userService.remove(user);
   }
 }

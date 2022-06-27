@@ -43,18 +43,4 @@ export class ProductController {
   async create(@Body() createProductDto: CreateProductDto) {
     return this.productService.create(createProductDto);
   }
-
-  @ApiOkResponse({
-    description: 'The product was successfully updated',
-    type: Product,
-  })
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productService.update(+id, updateProductDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productService.remove(+id);
-  }
 }

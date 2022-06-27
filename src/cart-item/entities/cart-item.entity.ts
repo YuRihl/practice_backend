@@ -7,9 +7,11 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 
 @Entity()
+@Unique(['product'])
 export class CartItem {
   @ApiProperty()
   @PrimaryGeneratedColumn('increment')
@@ -23,7 +25,7 @@ export class CartItem {
   @JoinColumn({ name: 'product_id' })
   product: Product;
 
-  @ApiProperty({ minimum: 1 })
-  @Column({ type: 'int', name: 'item_count' })
+  @ApiProperty({ minimum: 0, default: 0 })
+  @Column({ type: 'int', name: 'item_count', default: 0 })
   itemCount: number;
 }
