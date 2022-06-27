@@ -7,6 +7,8 @@ import { ProductModule } from './product/product.module';
 import { TypeOrmService } from './typeorm/typeorm.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { CartItemModule } from './cart-item/cart-item.module';
+import { PhotoModule } from './photo/photo.module';
 import * as Joi from 'joi';
 
 @Module({
@@ -39,6 +41,8 @@ import * as Joi from 'joi';
     ProductModule,
     UserModule,
     AuthModule,
+    CartItemModule,
+    PhotoModule,
   ],
   controllers: [AppController],
   providers: [AppService],

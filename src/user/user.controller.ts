@@ -3,14 +3,13 @@ import {
   Get,
   Body,
   Patch,
-  Param,
   Delete,
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiOkResponse } from '@nestjs/swagger';
-import { User } from './entities/user.entity';
+import { User } from './entities';
 import { JwtGuard } from 'src/auth/guard';
 import { UserDecorator } from 'src/auth/decorator';
 

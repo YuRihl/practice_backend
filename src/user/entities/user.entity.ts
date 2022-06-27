@@ -1,31 +1,36 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { CartItem } from 'src/cart-item/entities';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
 export class User {
-  @ApiProperty()
+  @ApiProperty({ description: 'Id is generated automatically, dont send it!' })
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @ApiProperty()
+  @ApiProperty({
+    minimum: 5,
+    maximum: 50,
+  })
   @Column({ unique: true, length: 50 })
   email: string;
 
-  @ApiProperty()
+  @ApiProperty({ minimum: 6, maximum: 100 })
   @Column({ length: 100 })
   password: string;
 
-  @ApiProperty()
+  @ApiProperty({ minimum: 1, maximum: 50 })
   @Column({ name: 'first_name', length: 50 })
   firstName: string;
 
-  @ApiProperty()
+  @ApiProperty({ minimum: 1, maximum: 50 })
   @Column({ name: 'second_name', length: 50 })
   secondName: string;
 
@@ -42,4 +47,8 @@ export class User {
   })
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @ApiProperty()
+  @OneToMany(() => CartItem, (cartItem) => cartItem.user)
+  cartItems: CartItem[];
 }

@@ -31,5 +31,17 @@ export class CreateProductDto {
 
   @ApiProperty({ description: 'Full information about product item' })
   @IsString()
-  fullInfo: string;
+  title: string;
+
+  @ApiProperty({ description: 'Full information about product item' })
+  @IsString()
+  text: string;
+
+  @ApiProperty()
+  @IsPositive()
+  categoryId: number;
+
+  @ApiProperty()
+  @IsPositive()
+  photoId: number;
 }

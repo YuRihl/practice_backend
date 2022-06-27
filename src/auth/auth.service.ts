@@ -6,7 +6,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/user/entities/user.entity';
+import { User } from 'src/user/entities';
 import { Repository } from 'typeorm';
 import { LoginDto, RegisterDto } from './dto';
 import * as bcrypt from 'bcrypt';
@@ -65,7 +65,7 @@ export class AuthService {
 
     return {
       access_token: await this.jwtService.signAsync(payload, {
-        expiresIn: '30m',
+        expiresIn: '500m',
         secret: this.configService.get<string>('JWT_SECRET_KEY'),
       }),
     };
