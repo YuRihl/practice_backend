@@ -29,7 +29,6 @@ export class ProductController {
 
   @Get('categories')
   findCategories() {
-    console.log('cum');
     return this.productService.findCategories();
   }
 
