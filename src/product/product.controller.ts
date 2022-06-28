@@ -22,9 +22,11 @@ export class ProductController {
   @Get()
   findAllProducts(
     @Query('category') category: string,
+    @Query('per_page') perPage: string,
+    @Query('page') page: string,
     @Query('name') name: string,
   ) {
-    return this.productService.findAllProducts(category, name);
+    return this.productService.findAllProducts(category, +perPage, +page, name);
   }
 
   @Get('categories')

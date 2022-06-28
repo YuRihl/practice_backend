@@ -20,7 +20,6 @@ export class PhotoService {
   }
 
   async findProduct(id: number) {
-    console.log(id);
     const photo = await this.photoRepository.findOne({
       where: {
         product: {

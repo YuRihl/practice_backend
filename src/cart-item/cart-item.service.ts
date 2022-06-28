@@ -77,6 +77,7 @@ export class CartItemService {
     const returnedCartItem = await this.cartItemRepository.findOne({
       select: {
         product: {
+          id: true,
           name: true,
           price: true,
         },
@@ -96,6 +97,7 @@ export class CartItemService {
     const returnedCartItem = await this.cartItemRepository.find({
       select: {
         product: {
+          id: true,
           name: true,
           price: true,
         },

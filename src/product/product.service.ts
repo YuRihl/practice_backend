@@ -18,7 +18,12 @@ export class ProductService {
     @InjectRepository(Photo) private photoRepository: Repository<Photo>,
   ) {}
 
-  async findAllProducts(category: string, name: string) {
+  async findAllProducts(
+    category: string,
+    perPage: number,
+    page: number,
+    name: string,
+  ) {
     return await this.productRepository.find({
       select: {
         id: true,
@@ -37,6 +42,8 @@ export class ProductService {
         },
         name,
       },
+      skip: (page - 1) * perPage,
+      take: perPage,
     });
   }
 
