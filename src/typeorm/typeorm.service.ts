@@ -1,9 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
-import { Category } from 'src/product/entities/category.entity';
-import { Product } from 'src/product/entities/product.entity';
-import { User } from 'src/user/entities/user.entity';
+import { CartItem } from 'src/cart-item/entities';
+import { Photo } from 'src/photo/entities';
+import { Category, Product, ProductInfo } from 'src/product/entities';
+import { User } from 'src/user/entities';
 
 @Injectable()
 export class TypeOrmService implements TypeOrmOptionsFactory {
@@ -20,7 +21,7 @@ export class TypeOrmService implements TypeOrmOptionsFactory {
       // entities: ['dist/**/*.entity.js'],
       // migrations: ['dist/**/migration/*.js'],
       // entities: [__dirname + '/**/*.entity.{ts,js}'],
-      entities: [Product, Category, User],
+      entities: [Product, Category, User, CartItem, ProductInfo, Photo],
       migrations: [__dirname + '/migrations/*.{ts,js}'],
       migrationsTableName: 'typeorm_migrations',
       logging: true,

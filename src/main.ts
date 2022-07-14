@@ -11,7 +11,7 @@ async function bootstrap() {
   });
 
   // initialize validation pipe
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   // getting .env port
   const config: ConfigService = app.get(ConfigService);
