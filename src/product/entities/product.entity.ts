@@ -1,14 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { CartItem } from 'src/cart-item/entities';
+import { Photo } from 'src/photo/entities/photo.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Category } from './category.entity';
+import { Category, ProductInfo } from './';
 
 @Entity()
 export class Product {
@@ -20,16 +24,8 @@ export class Product {
   @Column({ length: 50 })
   name: string;
 
-  @ApiProperty({
-    type: () => Category,
-    description: 'Category of product: sport, gaming, food etc',
-  })
-  @ManyToOne(() => Category, (category) => category.products)
-  @JoinColumn({ name: 'category_id' })
-  category: Category;
-
   @ApiProperty({ minimum: 0 })
-  @Column('money')
+  @Column({ type: 'money', scale: 2 })
   price: number;
 
   @ApiProperty({ description: 'How many items of product is sold', minimum: 0 })
@@ -39,10 +35,6 @@ export class Product {
   @ApiProperty({ description: 'General information about product item' })
   @Column({ type: 'text' })
   description: string;
-
-  @ApiProperty({ description: 'Full information about product item' })
-  @Column({ type: 'text', name: 'full_info' })
-  fullInfo: string;
 
   @ApiProperty({
     description:
@@ -57,4 +49,25 @@ export class Product {
   })
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @ApiProperty({
+    type: () => Category,
+    description: 'Category of product: sport, gaming, food etc',
+  })
+  @ManyToOne(() => Category, (category) => category.products)
+  @JoinColumn({ name: 'category_id' })
+  category: Category;
+
+  @ApiProperty()
+  @OneToMany(() => CartItem, (cartItem) => cartItem.product)
+  cartItems: CartItem[];
+
+  @ApiProperty({ type: () => ProductInfo })
+  @OneToOne(() => ProductInfo, (productInfo) => productInfo.product)
+  @JoinColumn({ name: 'product_info_id' })
+  info: ProductInfo;
+
+  @ApiProperty({ type: () => Photo })
+  @OneToOne(() => Photo, (photo) => photo.product)
+  photo: Photo;
 }

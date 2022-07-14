@@ -36,3 +36,4 @@ lerna-debug.log*
 
 # Excludes
 src/data-source.ts
+.env
