@@ -4,7 +4,6 @@ import { Product } from 'src/product/entities';
 import { User } from 'src/user/entities';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { CreateCartItemDto } from './dto/create-cart-item.dto';
-import { UpdateCartItemDto } from './dto/update-cart-item.dto';
 import { CartItem } from './entities';
 
 @Injectable()
@@ -67,7 +66,8 @@ export class CartItemService {
     const cartItem = await this.getCartItem({ id });
 
     if (cartItem.itemCount <= 0) {
-      this.cartItemRepository.update({ id: cartItem.id }, { itemCount: 0 });
+      const removedCartItem = await this.cartItemRepository.remove(cartItem);
+      return removedCartItem;
     }
 
     return this.getCartItem({ id: cartItem.id });

@@ -3,16 +3,14 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
   ParseIntPipe,
   Query,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+
+import { ApiCreatedResponse } from '@nestjs/swagger';
 import { Product } from './entities';
 
 @Controller('products')
