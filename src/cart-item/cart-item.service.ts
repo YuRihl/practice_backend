@@ -2,9 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from 'src/product/entities';
 import { User } from 'src/user/entities';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { CreateCartItemDto } from './dto/create-cart-item.dto';
-import { UpdateCartItemDto } from './dto/update-cart-item.dto';
 import { CartItem } from './entities';
 
 @Injectable()
@@ -17,11 +16,7 @@ export class CartItemService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {}
-  async create(createCartItemDto: CreateCartItemDto) {
-    const user = await this.userRepository.findOneBy({
-      id: createCartItemDto.userId,
-    });
-
+  async create(user: User, createCartItemDto: CreateCartItemDto) {
     const product = await this.productRepository.findOneBy({
       id: createCartItemDto.productId,
     });
@@ -43,76 +38,78 @@ export class CartItemService {
     return await this.checkItemCount(upsertResult.identifiers[0].id);
   }
 
-  async findAll() {
-    const cartItems = await this.getCartItems();
+  async findAll(user: User) {
+    const cartItems = await this.getCartItems({ user: { id: user.id } });
 
     if (!cartItems) return new NotFoundException();
 
     return cartItems;
   }
 
-  async findOne(id: number) {
-    const cartItem = await this.getCartItem(id);
+  async findOne(user: User, id: number) {
+    const cartItem = await this.getCartItem({ user: { id: user.id }, id });
 
     if (!cartItem) return new NotFoundException();
 
     return cartItem;
   }
 
-  async getCartItem(id: number) {
-    const returnedCartItem = await this.cartItemRepository.findOne({
-      select: {
-        product: {
-          name: true,
-          price: true,
-        },
-        itemCount: true,
-        id: true,
-      },
-      relations: {
-        product: true,
-      },
-      where: {
-        id: id,
-      },
-    });
-
-    return returnedCartItem;
-  }
-
-  async getCartItems() {
-    const returnedCartItem = await this.cartItemRepository.find({
-      select: {
-        product: {
-          name: true,
-          price: true,
-        },
-        itemCount: true,
-        id: true,
-      },
-      relations: {
-        product: true,
-      },
-    });
-
-    return returnedCartItem;
-  }
-
-  async checkItemCount(id: number) {
-    const cartItem = await this.cartItemRepository.findOneBy({ id });
-
-    if (cartItem.itemCount <= 0) {
-      this.cartItemRepository.update({ id: cartItem.id }, { itemCount: 0 });
-    }
-
-    return this.getCartItem(cartItem.id);
-  }
-
-  async remove(id: number) {
-    const cartItem = await this.getCartItem(id);
+  async remove(user: User, id: number) {
+    const cartItem = await this.getCartItem({ user: { id: user.id }, id });
 
     const deletedCartItem = await this.cartItemRepository.remove(cartItem);
 
     return deletedCartItem;
+  }
+
+  async checkItemCount(id: number) {
+    const cartItem = await this.getCartItem({ id });
+
+    if (cartItem.itemCount <= 0) {
+      const removedCartItem = await this.cartItemRepository.remove(cartItem);
+      return removedCartItem;
+    }
+
+    return this.getCartItem({ id: cartItem.id });
+  }
+
+  async getCartItem(options: FindOptionsWhere<CartItem>) {
+    const returnedCartItem = await this.cartItemRepository.findOne({
+      select: {
+        product: {
+          id: true,
+          name: true,
+          price: true,
+        },
+        itemCount: true,
+        id: true,
+      },
+      relations: {
+        product: true,
+      },
+      where: options,
+    });
+
+    return returnedCartItem;
+  }
+
+  async getCartItems(options: FindOptionsWhere<CartItem>) {
+    const returnedCartItem = await this.cartItemRepository.find({
+      select: {
+        product: {
+          id: true,
+          name: true,
+          price: true,
+        },
+        itemCount: true,
+        id: true,
+      },
+      relations: {
+        product: true,
+      },
+      where: options,
+    });
+
+    return returnedCartItem;
   }
 }

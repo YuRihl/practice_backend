@@ -5,11 +5,13 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities';
 import * as bcrypt from 'bcrypt';
 import { ReturnUserDto } from './dto/return-user.dto';
+import { CartItem } from 'src/cart-item/entities';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(CartItem) private cartRepository: Repository<CartItem>,
   ) {}
 
   findOne(user: User) {
@@ -32,6 +34,12 @@ export class UserService {
   }
 
   async remove(user: User) {
+    const userCart = await this.cartRepository.findBy({
+      user: { id: user.id },
+    });
+
+    const deletedCart = await this.cartRepository.remove(userCart);
+
     const { email, firstName, secondName }: ReturnUserDto =
       await this.userRepository.remove(user);
 

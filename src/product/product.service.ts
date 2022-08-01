@@ -1,9 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Photo } from 'src/photo/entities/photo.entity';
 import { Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
 import { Category, ProductInfo } from './entities';
 import { Product } from './entities';
 
@@ -18,7 +17,12 @@ export class ProductService {
     @InjectRepository(Photo) private photoRepository: Repository<Photo>,
   ) {}
 
-  async findAllProducts(category: string) {
+  async findAllProducts(
+    category: string,
+    perPage: number,
+    page: number,
+    name: string,
+  ) {
     return await this.productRepository.find({
       select: {
         id: true,
@@ -35,7 +39,10 @@ export class ProductService {
         category: {
           name: category,
         },
+        name,
       },
+      skip: (page - 1) * perPage,
+      take: perPage,
     });
   }
 
