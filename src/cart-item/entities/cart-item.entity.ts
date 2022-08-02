@@ -13,19 +13,21 @@ import {
 @Entity()
 @Unique(['product'])
 export class CartItem {
+
   @ApiProperty()
   @PrimaryGeneratedColumn('increment')
-  id: number;
+  public id!: number;
 
   @ManyToOne(() => User, (user) => user.cartItems)
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  public user!: User;
 
   @ManyToOne(() => Product, (product) => product.cartItems)
   @JoinColumn({ name: 'product_id' })
-  product: Product;
+  public product!: Product;
 
   @ApiProperty({ minimum: 0, default: 0 })
   @Column({ type: 'int', name: 'item_count', default: 0 })
-  itemCount: number;
+  public itemCount!: number;
+
 }

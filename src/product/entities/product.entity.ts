@@ -16,39 +16,40 @@ import { Category, ProductInfo } from './';
 
 @Entity()
 export class Product {
+
   @ApiProperty()
   @PrimaryGeneratedColumn('increment')
-  id: number;
+  public id!: number;
 
   @ApiProperty()
   @Column({ length: 50 })
-  name: string;
+  public name!: string;
 
   @ApiProperty({ minimum: 0 })
   @Column({ type: 'money', scale: 2 })
-  price: number;
+  public price!: number;
 
   @ApiProperty({ description: 'How many items of product is sold', minimum: 0 })
   @Column({ type: 'int', name: 'sold_count' })
-  soldCount: number;
+  public soldCount!: number;
 
   @ApiProperty({ description: 'General information about product item' })
   @Column({ type: 'text' })
-  description: string;
+  public description!: string;
 
   @ApiProperty({
     description:
       'Date when product item instance was created, changes only once product is created',
   })
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  public createdAt!: Date;
 
   @ApiProperty({
     description:
       'Date when information about product item was changed, changes every time when information is changed',
   })
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  public updatedAt!: Date;
 
   @ApiProperty({
     type: () => Category,
@@ -56,18 +57,19 @@ export class Product {
   })
   @ManyToOne(() => Category, (category) => category.products)
   @JoinColumn({ name: 'category_id' })
-  category: Category;
+  public category!: Category;
 
   @ApiProperty()
   @OneToMany(() => CartItem, (cartItem) => cartItem.product)
-  cartItems: CartItem[];
+  public cartItems!: CartItem[];
 
   @ApiProperty({ type: () => ProductInfo })
   @OneToOne(() => ProductInfo, (productInfo) => productInfo.product)
   @JoinColumn({ name: 'product_info_id' })
-  info: ProductInfo;
+  public info!: ProductInfo;
 
   @ApiProperty({ type: () => Photo })
   @OneToOne(() => Photo, (photo) => photo.product)
-  photo: Photo;
+  public photo!: Photo;
+
 }

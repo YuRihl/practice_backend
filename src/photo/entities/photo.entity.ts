@@ -11,32 +11,34 @@ import {
 
 @Entity()
 export class Photo {
+
   @ApiProperty()
   @PrimaryGeneratedColumn('increment')
-  id: number;
+  public id!: number;
 
   @ApiProperty()
   @Column({ length: 50 })
-  name: string;
+  public name!: string;
 
   @ApiProperty()
   @Column({ type: 'bytea' })
-  data: Uint8Array;
+  public data!: Uint8Array;
 
   @ApiProperty()
   @OneToOne(() => Product, (product) => product.photo, { nullable: true })
   @JoinColumn({ name: 'product_id' })
-  product?: Product;
+  public product?: Product;
 
   @ApiProperty()
   @OneToOne(() => Category, (category) => category.photo, { nullable: true })
   @JoinColumn({ name: 'category_id' })
-  category?: Category;
+  public category?: Category;
 
   @ApiProperty()
   @ManyToOne(() => ProductInfo, (productInfo) => productInfo.photos, {
     nullable: true,
   })
   @JoinColumn({ name: 'product_info_id' })
-  productInfo?: ProductInfo;
+  public productInfo?: ProductInfo;
+
 }

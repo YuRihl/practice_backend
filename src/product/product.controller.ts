@@ -11,30 +11,32 @@ import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 
 import { ApiCreatedResponse } from '@nestjs/swagger';
+import type { Category } from './entities';
 import { Product } from './entities';
 
 @Controller('products')
 export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+
+  constructor(private readonly productService: ProductService) { }
 
   @Get()
-  findAllProducts(
+  public async findAllProducts(
     @Query('category') category: string,
     @Query('per_page') perPage: string,
     @Query('page') page: string,
     @Query('name') name: string,
-  ) {
-    return this.productService.findAllProducts(category, +perPage, +page, name);
+  ): Promise<Product[]> {
+    return await this.productService.findAllProducts(category, +perPage, +page, name);
   }
 
   @Get('categories')
-  findCategories() {
-    return this.productService.findCategories();
+  public async findCategories(): Promise<Category[]> {
+    return await this.productService.findCategories();
   }
 
   @Get(':id')
-  findOneProduct(@Param('id', ParseIntPipe) id: number) {
-    return this.productService.findOneProduct(id);
+  public async findOneProduct(@Param('id', ParseIntPipe) id: number): Promise<Product> {
+    return await this.productService.findOneProduct(id);
   }
 
   @ApiCreatedResponse({
@@ -42,7 +44,8 @@ export class ProductController {
     type: Product,
   })
   @Post()
-  async create(@Body() createProductDto: CreateProductDto) {
+  public async create(@Body() createProductDto: CreateProductDto): Promise<Product> {
     return this.productService.create(createProductDto);
   }
+
 }

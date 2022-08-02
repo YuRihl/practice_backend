@@ -13,33 +13,35 @@ import { Product } from '.';
 
 @Entity()
 export class Category {
+
   @ApiProperty()
   @PrimaryGeneratedColumn('increment')
-  id: number;
+  public id!: number;
 
   @ApiProperty()
   @Column({ length: 50 })
-  name: string;
+  public name!: string;
 
   @ApiProperty({
     description:
       'Date when category instance was created, changes only once category is created',
   })
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  public createdAt!: Date;
 
   @ApiProperty({
     description:
       'Date when information about category was changed, changes every time when information is changed',
   })
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  public updatedAt!: Date;
 
   @ApiProperty({ type: () => Product })
   @OneToMany(() => Product, (product) => product.category)
-  products: Product[];
+  public products!: Product[];
 
   @ApiProperty({ type: () => Photo })
   @OneToOne(() => Photo, (photo) => photo.category)
-  photo: Photo;
+  public photo!: Photo;
+
 }

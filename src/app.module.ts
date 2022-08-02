@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductModule } from './product/product.module';
 import { TypeOrmService } from './typeorm/typeorm.service';
@@ -45,6 +45,4 @@ import * as Joi from 'joi';
   controllers: [],
   providers: [],
 })
-export class AppModule {
-  constructor(private configService: ConfigService) { }
-}
+export class AppModule { }

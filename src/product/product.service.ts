@@ -1,13 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Photo } from 'src/photo/entities/photo.entity';
+import type { DeepPartial, FindOptionsSelect } from 'typeorm';
 import { Repository } from 'typeorm';
-import { CreateProductDto } from './dto/create-product.dto';
+import type { CreateProductDto } from './dto/create-product.dto';
 import { Category, ProductInfo } from './entities';
 import { Product } from './entities';
 
 @Injectable()
 export class ProductService {
+
   constructor(
     @InjectRepository(Product) private productRepository: Repository<Product>,
     @InjectRepository(ProductInfo)
@@ -15,14 +17,26 @@ export class ProductService {
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
     @InjectRepository(Photo) private photoRepository: Repository<Photo>,
-  ) {}
+  ) { }
 
-  async findAllProducts(
+  public async findAllProducts(
     category: string,
     perPage: number,
     page: number,
     name: string,
-  ) {
+  ): Promise<Product[]> {
+    const checkSkipIsNaN = (): number => {
+      if (isNaN((page - 1) * perPage)) return 0;
+
+      return (page - 1) * perPage;
+    };
+
+    const checkTakeIsNaN = async (): Promise<number> => {
+      if (isNaN(perPage)) return await this.productRepository.countBy({ category: { name: category }, name });
+
+      return perPage;
+    };
+
     return await this.productRepository.find({
       select: {
         id: true,
@@ -41,20 +55,20 @@ export class ProductService {
         },
         name,
       },
-      skip: (page - 1) * perPage,
-      take: perPage,
+      skip: checkSkipIsNaN(),
+      take: await checkTakeIsNaN(),
     });
   }
 
-  async findOneProduct(id: number) {
-    return await this.productRepository.findOne({
+  public async findOneProduct(id: number): Promise<Product> {
+    const product = await this.productRepository.findOne({
       select: {
         id: true,
         name: true,
         price: true,
         soldCount: true,
         description: true,
-      },
+      } as FindOptionsSelect<Product>,
       relations: {
         category: true,
         info: true,
@@ -63,20 +77,23 @@ export class ProductService {
         id,
       },
     });
+
+    if (!product) throw new NotFoundException();
+
+    return product;
   }
 
-  async findCategories() {
-    const categories = await this.categoryRepository.find({
+  public async findCategories(): Promise<Category[]> {
+    return await this.categoryRepository.find({
       select: {
         id: true,
         name: true,
       },
     });
 
-    return categories;
   }
 
-  async create(createProductDto: CreateProductDto) {
+  public async create(createProductDto: CreateProductDto): Promise<Product> {
     const newProductInfo = await this.createProductInfo(
       createProductDto.title,
       createProductDto.text,
@@ -98,13 +115,13 @@ export class ProductService {
       info: newProductInfo,
       category,
       photo,
-    });
+    } as DeepPartial<Product>);
 
     await this.productRepository.save(newProduct);
     return newProduct;
   }
 
-  async createProductInfo(title: string, text: string) {
+  private async createProductInfo(title: string, text: string): Promise<ProductInfo> {
     const newProductInfo = await this.productInfoRepository.create({
       title,
       text,
@@ -113,4 +130,5 @@ export class ProductService {
     await this.productInfoRepository.save(newProductInfo);
     return newProductInfo;
   }
+
 }

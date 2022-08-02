@@ -10,4 +10,4 @@ import { Photo } from 'src/photo/entities';
   controllers: [ProductController],
   providers: [ProductService],
 })
-export class ProductModule {}
+export class ProductModule { }

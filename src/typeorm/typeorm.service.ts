@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
+import type { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { CartItem } from 'src/cart-item/entities';
 import { Photo } from 'src/photo/entities';
 import { Category, Product, ProductInfo } from 'src/product/entities';
@@ -8,7 +8,8 @@ import { User } from 'src/user/entities';
 
 @Injectable()
 export class TypeOrmService implements TypeOrmOptionsFactory {
-  constructor(@Inject(ConfigService) private readonly config: ConfigService) {}
+
+  constructor(@Inject(ConfigService) private readonly config: ConfigService) { }
 
   public createTypeOrmOptions(): TypeOrmModuleOptions {
     return {
@@ -26,4 +27,5 @@ export class TypeOrmService implements TypeOrmOptionsFactory {
       autoLoadEntities: true,
     };
   }
+
 }

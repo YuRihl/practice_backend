@@ -3,7 +3,6 @@ import { Photo } from 'src/photo/entities';
 import {
   Column,
   Entity,
-  JoinColumn,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -12,23 +11,25 @@ import { Product } from './';
 
 @Entity()
 export class ProductInfo {
+
   @ApiProperty()
   @PrimaryGeneratedColumn('increment')
-  id: number;
+  public id!: number;
 
   @ApiProperty()
   @Column({ length: 100 })
-  title: string;
+  public title!: string;
 
   @ApiProperty()
   @Column({ type: 'text' })
-  text: string;
+  public text!: string;
 
   @ApiProperty()
   @OneToOne(() => Product, (product) => product.info)
-  product: Product;
+  public product!: Product;
 
   @ApiProperty({ type: () => Photo })
   @OneToMany(() => Photo, (photo) => photo.productInfo)
-  photos: Photo[];
+  public photos!: Photo[];
+
 }

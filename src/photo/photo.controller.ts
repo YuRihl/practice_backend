@@ -2,10 +2,7 @@ import {
   Controller,
   Get,
   Post,
-  Body,
-  Patch,
   Param,
-  Delete,
   UseInterceptors,
   ClassSerializerInterceptor,
   UploadedFile,
@@ -17,24 +14,26 @@ import { PhotoService } from './photo.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Readable } from 'typeorm/platform/PlatformTools';
 import { Response } from 'express';
+import type { Photo } from './entities';
 
 @Controller('photos')
 @UseInterceptors(ClassSerializerInterceptor)
 export class PhotoController {
-  constructor(private readonly photoService: PhotoService) {}
+
+  constructor(private readonly photoService: PhotoService) { }
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
-  create(@UploadedFile() file: Express.Multer.File) {
+  public async create(@UploadedFile() file: Express.Multer.File): Promise<Photo> {
     return this.photoService.create(file.buffer, file.originalname);
   }
 
   @Get('product/:id')
-  async findProduct(
+  public async findProductPhoto(
     @Param('id', ParseIntPipe) id: number,
     @Res({ passthrough: true }) response: Response,
-  ) {
-    const photo = await this.photoService.findProduct(id);
+  ): Promise<StreamableFile> {
+    const photo = await this.photoService.findProductPhoto(id);
 
     const stream = Readable.from(photo.data);
 
@@ -47,11 +46,11 @@ export class PhotoController {
   }
 
   @Get('category/:id')
-  async findCategory(
+  public async findCategoryPhoto(
     @Param('id', ParseIntPipe) id: number,
     @Res({ passthrough: true }) response: Response,
-  ) {
-    const photo = await this.photoService.findCategory(id);
+  ): Promise<StreamableFile> {
+    const photo = await this.photoService.findCategoryPhoto(id);
 
     const stream = Readable.from(photo.data);
 
@@ -64,12 +63,12 @@ export class PhotoController {
   }
 
   @Get('productInfo/:id/:photoNumber')
-  async findProductInfo(
+  public async findProductInfoPhoto(
     @Param('id', ParseIntPipe) id: number,
     @Param('photoNumber', ParseIntPipe) photoNumber: number,
     @Res({ passthrough: true }) response: Response,
-  ) {
-    const photo = await this.photoService.findProductInfo(id, photoNumber);
+  ): Promise<StreamableFile> {
+    const photo = await this.photoService.findProductInfoPhoto(id, photoNumber);
 
     const stream = Readable.from(photo.data);
 
@@ -81,13 +80,4 @@ export class PhotoController {
     return new StreamableFile(stream);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updatePhotoDto: UpdatePhotoDto) {
-  //   return this.photoService.update(+id, updatePhotoDto);
-  // }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.photoService.remove(+id);
-  }
 }

@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -9,57 +8,52 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entities';
 import { Repository } from 'typeorm';
-import { LoginDto, RegisterDto } from './dto';
+import type { LoginDto, RegisterDto } from './dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
+
   constructor(
     private configService: ConfigService,
     private jwtService: JwtService,
     @InjectRepository(User) private userRepository: Repository<User>,
-  ) {}
+  ) { }
 
-  async login(userDto: LoginDto) {
-    const user: User = await this.userRepository.findOneBy({
+  public async login(userDto: LoginDto): Promise<{ access_token: string }> {
+    const user = await this.userRepository.findOneBy({
       email: userDto.email,
     });
 
-    if (!user) return new NotFoundException('The are not user with this email');
+    if (!user) throw new NotFoundException('The are not user with this email');
 
     const passwordCheck = await bcrypt.compare(userDto.password, user.password);
 
-    if (!passwordCheck) {
-      return new UnauthorizedException('Incorrect password');
-    }
+    if (!passwordCheck) throw new UnauthorizedException('Incorrect password');
 
-    return this.signToken(user.email, user.id);
+    return await this.signToken(user.email, user.id);
   }
 
-  async register(userDto: RegisterDto) {
-    try {
-      const hashSalt = await bcrypt.genSalt();
+  public async register(userDto: RegisterDto): Promise<{ access_token: string }> {
+    const hashSalt = await bcrypt.genSalt();
 
-      const userToCreate = this.userRepository.create({
-        email: userDto.email,
-        password: await bcrypt.hash(userDto.password, hashSalt),
-        firstName: userDto.firstName,
-        secondName: userDto.secondName,
-      });
+    const userToCreate = this.userRepository.create({
+      email: userDto.email,
+      password: await bcrypt.hash(userDto.password, hashSalt),
+      firstName: userDto.firstName,
+      secondName: userDto.secondName,
+    });
 
-      await this.userRepository.save(userToCreate);
+    await this.userRepository.save(userToCreate);
 
-      const createdUser: User = await this.userRepository.findOneBy({
-        email: userDto.email,
-      });
+    const createdUser = await this.userRepository.findOneBy({
+      email: userDto.email,
+    }) as User;
 
-      return this.signToken(createdUser.email, createdUser.id);
-    } catch (error) {
-      return new BadRequestException(error);
-    }
+    return await this.signToken(createdUser.email, createdUser.id);
   }
 
-  async signToken(email: string, id: number) {
+  private async signToken(email: string, id: number): Promise<{ access_token: string }> {
     const payload = { email, sub: id };
 
     return {
@@ -69,4 +63,5 @@ export class AuthService {
       }),
     };
   }
+
 }
