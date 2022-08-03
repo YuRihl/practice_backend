@@ -6,6 +6,7 @@ import {
   Param,
   ParseIntPipe,
   Query,
+  DefaultValuePipe,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -22,11 +23,11 @@ export class ProductController {
   @Get()
   public async findAllProducts(
     @Query('category') category: string,
-    @Query('per_page') perPage: string,
-    @Query('page') page: string,
+    @Query('per_page', new DefaultValuePipe(0), ParseIntPipe) perPage: number,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('name') name: string,
   ): Promise<Product[]> {
-    return await this.productService.findAllProducts(category, +perPage, +page, name);
+    return await this.productService.findAllProducts(category, perPage, page, name);
   }
 
   @Get('categories')

@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Photo } from 'src/photo/entities/photo.entity';
 import type { DeepPartial, FindOptionsSelect } from 'typeorm';
+import { Like } from 'typeorm';
 import { Repository } from 'typeorm';
 import type { CreateProductDto } from './dto/create-product.dto';
 import { Category, ProductInfo } from './entities';
@@ -26,15 +27,10 @@ export class ProductService {
     name: string,
   ): Promise<Product[]> {
     const checkSkipIsNaN = (): number => {
-      if (isNaN((page - 1) * perPage)) return 0;
+      if (page <= 0 || perPage < 0)
+        throw new BadRequestException('Pagination values are negative, but they have to be positive');
 
       return (page - 1) * perPage;
-    };
-
-    const checkTakeIsNaN = async (): Promise<number> => {
-      if (isNaN(perPage)) return await this.productRepository.countBy({ category: { name: category }, name });
-
-      return perPage;
     };
 
     return await this.productRepository.find({
@@ -53,10 +49,13 @@ export class ProductService {
         category: {
           name: category,
         },
-        name,
+        name: Like(`${name}%`),
+      },
+      order: {
+        id: 'asc',
       },
       skip: checkSkipIsNaN(),
-      take: await checkTakeIsNaN(),
+      take: perPage,
     });
   }
 
