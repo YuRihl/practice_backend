@@ -5,8 +5,8 @@ import type { DeepPartial, FindOptionsSelect } from 'typeorm';
 import { Like } from 'typeorm';
 import { Repository } from 'typeorm';
 import type { CreateProductDto } from './dto/create-product.dto';
-import { Category, ProductInfo } from './entities';
-import { Product } from './entities';
+import { Category } from '../category/entities/category.entity';
+import { Product, ProductInfo } from './entities';
 
 @Injectable()
 export class ProductService {
@@ -26,7 +26,7 @@ export class ProductService {
     page: number,
     name: string,
   ): Promise<Product[]> {
-    const checkSkipIsNaN = (): number => {
+    const checkSkip = (): number => {
       if (page <= 0 || perPage < 0)
         throw new BadRequestException('Pagination values are negative, but they have to be positive');
 
@@ -47,14 +47,14 @@ export class ProductService {
       },
       where: {
         category: {
-          name: category,
+          name: category === 'All Category' ? undefined : category,
         },
         name: Like(`${name}%`),
       },
       order: {
         id: 'asc',
       },
-      skip: checkSkipIsNaN(),
+      skip: checkSkip(),
       take: perPage,
     });
   }
@@ -80,16 +80,6 @@ export class ProductService {
     if (!product) throw new NotFoundException();
 
     return product;
-  }
-
-  public async findCategories(): Promise<Category[]> {
-    return await this.categoryRepository.find({
-      select: {
-        id: true,
-        name: true,
-      },
-    });
-
   }
 
   public async create(createProductDto: CreateProductDto): Promise<Product> {

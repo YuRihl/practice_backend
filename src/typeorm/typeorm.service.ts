@@ -2,8 +2,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { CartItem } from 'src/cart-item/entities';
+import { Category } from 'src/category/entities/category.entity';
 import { Photo } from 'src/photo/entities';
-import { Category, Product, ProductInfo } from 'src/product/entities';
+import { Product, ProductInfo } from 'src/product/entities';
 import { User } from 'src/user/entities';
 
 @Injectable()

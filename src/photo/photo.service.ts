@@ -63,7 +63,7 @@ export class PhotoService {
       },
     });
 
-    if (photo.length === 0) {
+    if (photo.length === 0 || photoNumber > photo.length) {
       throw new NotFoundException();
     }
 

@@ -12,7 +12,6 @@ import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 
 import { ApiCreatedResponse } from '@nestjs/swagger';
-import type { Category } from './entities';
 import { Product } from './entities';
 
 @Controller('products')
@@ -22,17 +21,12 @@ export class ProductController {
 
   @Get()
   public async findAllProducts(
-    @Query('category') category: string,
+    @Query('category', new DefaultValuePipe('All Category')) category: string,
     @Query('per_page', new DefaultValuePipe(0), ParseIntPipe) perPage: number,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('name') name: string,
+    @Query('name', new DefaultValuePipe('')) name: string,
   ): Promise<Product[]> {
     return await this.productService.findAllProducts(category, perPage, page, name);
-  }
-
-  @Get('categories')
-  public async findCategories(): Promise<Category[]> {
-    return await this.productService.findCategories();
   }
 
   @Get(':id')

@@ -24,7 +24,7 @@ export class ProductInfo {
   @Column({ type: 'text' })
   public text!: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: () => Product })
   @OneToOne(() => Product, (product) => product.info)
   public product!: Product;
 

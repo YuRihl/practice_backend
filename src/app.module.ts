@@ -7,6 +7,7 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { CartItemModule } from './cart-item/cart-item.module';
 import { PhotoModule } from './photo/photo.module';
+import { CategoryModule } from './category/category.module';
 import * as Joi from 'joi';
 
 @Module({
@@ -41,6 +42,7 @@ import * as Joi from 'joi';
     AuthModule,
     CartItemModule,
     PhotoModule,
+    CategoryModule,
   ],
   controllers: [],
   providers: [],
