@@ -1,19 +1,21 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ProductModule } from './product/product.module';
-import { TypeOrmService } from './typeorm/typeorm.service';
-import { UserModule } from './user/user.module';
-import { AuthModule } from './auth/auth.module';
-import { CartItemModule } from './cart-item/cart-item.module';
-import { PhotoModule } from './photo/photo.module';
-import { CategoryModule } from './category/category.module';
+import { ProductModule } from './modules/products/product.module';
+import { TypeOrmService } from './modules/typeorm/typeorm.service';
+import { UserModule } from './modules/users/user.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { CartItemModule } from './modules/cart/cart-item.module';
+import { PhotoModule } from './modules/photos/photo.module';
+import { CategoryModule } from './modules/categories/category.module';
+import { OrderModule } from './modules/orders/order.module';
 import * as Joi from 'joi';
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({ useClass: TypeOrmService }),
     ConfigModule.forRoot({
+      envFilePath: 'src/config/.env',
       isGlobal: true,
       validationSchema: Joi.object({
         PORT: Joi.number().default(3000),
@@ -43,6 +45,7 @@ import * as Joi from 'joi';
     CartItemModule,
     PhotoModule,
     CategoryModule,
+    OrderModule,
   ],
   controllers: [],
   providers: [],
