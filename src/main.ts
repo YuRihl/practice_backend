@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { HttpExceptionFilter } from './@framework/filters/http-exception.filter';
 import { AppModule } from './app.module';
 
 async function bootstrap(): Promise<void> {
@@ -12,6 +13,8 @@ async function bootstrap(): Promise<void> {
 
   // initialize validation pipe
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   // getting .env port
   const config: ConfigService = app.get(ConfigService);

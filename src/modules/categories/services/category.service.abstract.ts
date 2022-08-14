@@ -1,7 +1,7 @@
-import type { Category } from '../entities/category.entity';
+import type { Category } from '../entities';
 
-interface ICategoryService {
-    findCategories(): Promise<Category[]>;
+export default abstract class ICategoryService {
+
+  public abstract findCategories(): Promise<Category[]>;
+
 }
-
-export default ICategoryService;

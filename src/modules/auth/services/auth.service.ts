@@ -2,15 +2,17 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/modules/users/entities';
-import { Repository } from 'typeorm';
-import type { LoginDto, RegisterDto } from '../dtos';
+import { QueryFailedError, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import type IAuthService from './auth.service.abstract';
+import type { LoginDto, RegisterDto } from '../dtos';
+import { User } from '../../users/entities';
+import type { DatabaseError } from 'pg-protocol';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -26,36 +28,46 @@ export class AuthService implements IAuthService {
       email: userDto.email,
     });
 
-    if (!user) throw new NotFoundException('The are not user with this email');
+    if (!user) throw new NotFoundException('There is no any user with this email');
 
     const passwordCheck = await bcrypt.compare(userDto.password, user.password);
 
     if (!passwordCheck) throw new UnauthorizedException('Incorrect password');
 
-    return await this.signToken(user.email, user.id);
+    return this.signToken(user.id, user.email, user.password);
   }
 
   public async register(userDto: RegisterDto): Promise<{ access_token: string }> {
-    const hashSalt = await bcrypt.genSalt();
+    try {
+      const hashSalt = await bcrypt.genSalt();
 
-    const userToCreate = this.userRepository.create({
-      email: userDto.email,
-      password: await bcrypt.hash(userDto.password, hashSalt),
-      firstName: userDto.firstName,
-      secondName: userDto.secondName,
-    });
+      const userToCreate = this.userRepository.create({
+        email: userDto.email,
+        password: await bcrypt.hash(userDto.password, hashSalt),
+        firstName: userDto.firstName,
+        secondName: userDto.secondName,
+      });
 
-    await this.userRepository.save(userToCreate);
+      await this.userRepository.save(userToCreate);
 
-    const createdUser = await this.userRepository.findOneBy({
-      email: userDto.email,
-    }) as User;
+      const createdUser = await this.userRepository.findOneBy({
+        email: userDto.email,
+      }) as User;
 
-    return await this.signToken(createdUser.email, createdUser.id);
+      return this.signToken(createdUser.id, createdUser.email, createdUser.password);
+    } catch (error: unknown) {
+
+      if (error instanceof QueryFailedError) {
+        if ((error.driverError as DatabaseError).code === '23505') {
+          throw new UnprocessableEntityException('This email already exists!');
+        }
+      }
+      return { access_token: (error as object).constructor.name };
+    }
   }
 
-  public async signToken(email: string, id: number): Promise<{ access_token: string }> {
-    const payload = { email, sub: id };
+  public async signToken(id: number, email: string, password: string): Promise<{ access_token: string }> {
+    const payload = { sub: id, email, password };
 
     return {
       access_token: await this.jwtService.signAsync(payload, {

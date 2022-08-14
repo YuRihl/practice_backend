@@ -1,29 +1,22 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiCreatedResponse } from '@nestjs/swagger';
-import { User } from 'src/modules/users/entities';
-import { AuthService } from '../services/auth.service';
 import { RegisterDto } from '../dtos';
 import { LoginDto } from '../dtos/login.dto';
+import IAuthService from '../services/auth.service.abstract';
 
 @Controller()
 export class AuthController {
 
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: IAuthService) { }
 
-  @ApiCreatedResponse({
-    description: 'The user was logged in successfully',
-    type: User,
-  })
+  @ApiCreatedResponse()
   @HttpCode(HttpStatus.OK)
   @Post('auth/login')
   public async login(@Body() body: LoginDto): Promise<{ access_token: string }> {
     return this.authService.login(body);
   }
 
-  @ApiCreatedResponse({
-    description: 'The user was created successfully',
-    type: User,
-  })
+  @ApiCreatedResponse()
   @Post('auth/register')
   public async register(@Body() body: RegisterDto): Promise<{ access_token: string }> {
     return this.authService.register(body);

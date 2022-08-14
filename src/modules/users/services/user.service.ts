@@ -1,11 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import type { UpdateUserDto } from '../dtos/update-user.dto';
 import { User } from '../entities';
 import * as bcrypt from 'bcrypt';
-import type { ReturnUserDto } from '../dtos/return-user.dto';
-import { CartItem } from 'src/modules/cart/entities';
+import { CartItem } from '../../cart/entities';
 import type IUserService from './user.service.abstract';
 
 @Injectable()
@@ -16,16 +15,19 @@ export class UserService implements IUserService {
     @InjectRepository(CartItem) private cartRepository: Repository<CartItem>,
   ) { }
 
-  public async findOne(user: User): Promise<ReturnUserDto> {
-    const { email, firstName, secondName, createdAt } = user;
-    return await { email, firstName, secondName, createdAt };
+  public findOne(user: User): User {
+    return user;
   }
 
   public async findAll(): Promise<User[]> {
-    return await this.userRepository.find();
+    const users = await this.userRepository.find();
+
+    if (!users.length) throw new NotFoundException();
+
+    return users;
   }
 
-  public async update(user: User, updateUserDto: UpdateUserDto): Promise<ReturnUserDto> {
+  public async update(user: User, updateUserDto: UpdateUserDto): Promise<User> {
 
     for (const key in updateUserDto) {
       const userKey: keyof UpdateUserDto = key as keyof UpdateUserDto;
@@ -39,12 +41,7 @@ export class UserService implements IUserService {
       user.password = await bcrypt.hash(updateUserDto.password, hashSalt);
     }
 
-    await this.userRepository.save(user);
-
-    const { email, firstName, secondName, updatedAt } =
-      await this.userRepository.findOneBy({ id: user.id }) as User;
-
-    return { email, firstName, secondName, updatedAt };
+    return await this.userRepository.save(user);
   }
 
   public async remove(user: User): Promise<{ message: string }> {
@@ -54,7 +51,7 @@ export class UserService implements IUserService {
 
     await this.cartRepository.remove(userCart);
 
-    const { firstName, secondName }: ReturnUserDto =
+    const { firstName, secondName }: User =
       await this.userRepository.remove(user);
 
     return { message: `User ${firstName} ${secondName} was deleted successfully` };

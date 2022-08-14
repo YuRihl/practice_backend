@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Product } from 'src/modules/products/entities';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Product } from '../../products/entities';
 import { Order } from '.';
 
 @Entity()

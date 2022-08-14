@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Photo } from 'src/modules/photos/entities/photo.entity';
+import { Photo } from '../../photos/entities';
 import type { DeepPartial, FindOptionsSelect } from 'typeorm';
 import { Like } from 'typeorm';
 import { Repository } from 'typeorm';

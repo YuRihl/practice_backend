@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CartItem } from 'src/modules/cart/entities';
-import { Order } from 'src/modules/orders/entities';
+import { CartItem } from '../../cart/entities';
+import { Order } from '../../orders/entities';
 import {
   Column,
   CreateDateColumn,
@@ -10,6 +10,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User {
@@ -27,6 +28,7 @@ export class User {
   public isVerified!: boolean;
 
   @ApiProperty()
+  @Exclude()
   @Column({ type: 'varchar', length: 100 })
   public password!: string;
 

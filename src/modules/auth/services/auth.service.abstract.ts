@@ -1,9 +1,9 @@
 import type { LoginDto, RegisterDto } from '../dtos';
 
-interface IAuthService {
-    login(userDto: LoginDto): Promise<{ access_token: string }>;
-    register(userDto: RegisterDto): Promise<{ access_token: string }>;
-    signToken(email: string, id: number): Promise<{ access_token: string }>;
-}
+export default abstract class IAuthService {
 
-export default IAuthService;
+  public abstract login(userDto: LoginDto): Promise<{ access_token: string }>;
+  public abstract register(userDto: RegisterDto): Promise<{ access_token: string }>;
+  public abstract signToken(id: number, email: string, password: string): Promise<{ access_token: string }>;
+
+}

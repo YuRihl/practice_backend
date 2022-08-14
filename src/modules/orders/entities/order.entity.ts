@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from 'src/modules/users/entities';
 import { Column, CreateDateColumn, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from '../../users/entities';
 import { OrderItem } from '.';
 
 export enum OrderStatus {

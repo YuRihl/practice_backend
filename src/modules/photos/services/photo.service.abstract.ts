@@ -1,7 +1,7 @@
 import type { Photo } from '../entities';
 
-interface IPhotoService {
-    findProductPhoto(id: number): Promise<Photo>;
-}
+export default abstract class IPhotoService {
 
-export default IPhotoService;
+  public abstract findProductPhoto(id: number): Promise<Photo>;
+
+}

@@ -8,42 +8,42 @@ import {
   UseGuards,
   ParseIntPipe,
 } from '@nestjs/common';
-import { UserDecorator } from 'src/@framework/decorators';
-import { JwtGuard } from 'src/@framework/guards';
-import { User } from 'src/modules/users/entities';
-import { CartItemService } from '../services/cart-item.service';
+import { UserDecorator } from '../../../@framework/decorators';
+import { JwtGuard } from '../../../@framework/guards';
 import { CreateCartItemDto } from '../dtos/create-cart-item.dto';
+import { User } from '../../users/entities';
 import type { CartItem } from '../entities';
+import ICartItemService from '../services/cart-item.service.abstract';
 
 @Controller('user/cart')
 export class CartItemController {
 
-  constructor(private readonly cartItemService: CartItemService) { }
+  constructor(private readonly cartItemService: ICartItemService) { }
 
   @UseGuards(JwtGuard)
   @Post()
-  public async create(
+  public create(
     @UserDecorator() user: User,
     @Body() createCartItemDto: CreateCartItemDto,
   ): Promise<CartItem> {
-    return await this.cartItemService.create(user, createCartItemDto);
+    return this.cartItemService.create(user, createCartItemDto);
   }
 
   @UseGuards(JwtGuard)
   @Get()
-  public async findAll(@UserDecorator() user: User): Promise<CartItem[]> {
+  public findAll(@UserDecorator() user: User): Promise<CartItem[]> {
     return this.cartItemService.findAll(user);
   }
 
   @UseGuards(JwtGuard)
   @Get(':id')
-  public async findOne(@UserDecorator() user: User, @Param('id', ParseIntPipe) id: number): Promise<CartItem> {
+  public findOne(@UserDecorator() user: User, @Param('id', ParseIntPipe) id: number): Promise<CartItem> {
     return this.cartItemService.findOne(user, id);
   }
 
   @UseGuards(JwtGuard)
   @Delete(':id')
-  public async remove(@UserDecorator() user: User, @Param('id', ParseIntPipe) id: number): Promise<CartItem> {
+  public remove(@UserDecorator() user: User, @Param('id', ParseIntPipe) id: number): Promise<CartItem> {
     return this.cartItemService.remove(user, id);
   }
 

@@ -1,13 +1,13 @@
 import type { CreateProductDto } from '../dtos/create-product.dto';
 import type { Product } from '../entities';
 
-interface IProductService {
-    findAllProducts(
-        perPage: number,
-        page: number,
-        name: string): Promise<Product[]>;
-    findOneProduct(id: number): Promise<Product>;
-    create(createProductDto: CreateProductDto): Promise<Product>;
-}
+export default abstract class IProductService {
 
-export default IProductService;
+  public abstract findAllProducts(
+    perPage: number,
+    page: number,
+    name: string): Promise<Product[]>;
+  public abstract findOneProduct(id: number): Promise<Product>;
+  public abstract create(createProductDto: CreateProductDto): Promise<Product>;
+
+}

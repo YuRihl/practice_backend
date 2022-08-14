@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ProductCategory } from 'src/modules/products/entities';
 import {
   Column,
   CreateDateColumn,
@@ -8,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { ProductCategory } from '../../products/entities';
 
 @Entity()
 export class Category {

@@ -5,46 +5,43 @@ import {
   Delete,
   UseGuards,
   Get,
+  UseInterceptors,
+  ClassSerializerInterceptor,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
-import { UserService } from '../services/user.service';
-import type { ReturnUserDto } from '../dtos';
 import { UpdateUserDto } from '../dtos';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { User } from '../entities';
-import { JwtGuard } from 'src/@framework/guards';
-import { UserDecorator } from 'src/@framework/decorators';
+import { JwtGuard } from '../../../@framework/guards';
+import { UserDecorator } from '../../../@framework/decorators';
+import IUserService from '../services/user.service.abstract';
 
 @Controller('user')
 export class UserController {
 
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: IUserService) { }
 
-  @ApiOkResponse({
-    description: 'The user was found successfully',
-    type: User,
-  })
+  @ApiOkResponse()
+  @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtGuard)
   @Get('profile')
-  public async findOne(@UserDecorator() user: User): Promise<ReturnUserDto> {
-    return await this.userService.findOne(user);
+  public findOne(@UserDecorator() user: User): User {
+    return this.userService.findOne(user);
   }
 
   // FOR ADMIN
-  @ApiOkResponse({
-    description: 'All users were found successfully',
-  })
+  @ApiOkResponse()
   @Get('profiles')
-  public async findAll(): Promise<User[]> {
-    return await this.userService.findAll();
+  public findAll(): Promise<User[]> {
+    return this.userService.findAll();
   }
 
-  @ApiOkResponse({
-    description: 'The user was updated successfully',
-    type: User,
-  })
+  @ApiOkResponse()
+  @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtGuard)
   @Patch('profile')
-  public async update(@UserDecorator() user: User, @Body() updateUserDto: UpdateUserDto): Promise<ReturnUserDto> {
+  public update(@UserDecorator() user: User, @Body() updateUserDto: UpdateUserDto): Promise<User> {
     return this.userService.update(user, updateUserDto);
   }
 
@@ -52,9 +49,10 @@ export class UserController {
     description: 'The user was deleted successfully',
     type: User,
   })
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtGuard)
   @Delete('profile')
-  public async remove(@UserDecorator() user: User): Promise<{ message: string }> {
+  public remove(@UserDecorator() user: User): Promise<{ message: string }> {
     return this.userService.remove(user);
   }
 

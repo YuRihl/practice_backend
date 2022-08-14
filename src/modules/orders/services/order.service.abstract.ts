@@ -1,5 +1,4 @@
-interface IOrderService {
+
+export default abstract class IOrderService {
 
 }
-
-export default IOrderService;

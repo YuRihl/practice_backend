@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CartItem } from 'src/modules/cart/entities';
 import { ProductCategory } from '.';
 import {
   Column,
@@ -9,7 +8,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { OrderItem } from 'src/modules/orders/entities/order-item.entity';
+import { CartItem } from '../../cart/entities';
+import { OrderItem } from '../../orders/entities';
 
 @Entity()
 export class Product {
