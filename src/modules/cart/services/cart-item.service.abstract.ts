@@ -5,7 +5,7 @@ import type { CartItem } from '../entities';
 
 export default abstract class ICartItemService {
 
-  public abstract create(user: User, createCartItemDto: CreateCartItemDto): Promise<CartItem>;
+  public abstract create(user: User, createCartItemDto: CreateCartItemDto): Promise<CartItem | void>;
   public abstract findAll(user: User): Promise<CartItem[]>;
   public abstract findOne(user: User, id: number): Promise<CartItem>;
   public abstract remove(user: User, id: number): Promise<CartItem>;

@@ -1,6 +1,7 @@
 import {
   IsInt,
   IsNotEmpty,
+  IsOptional,
   IsPositive,
   IsString,
   MaxLength,
@@ -17,24 +18,22 @@ export class CreateProductDto {
   @IsPositive()
   public price!: number;
 
+  @IsOptional()
   @IsInt()
   @Min(0)
-  public soldCount!: number;
+  public availableCount?: number;
 
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  public soldCount?: number;
+
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  public description!: string;
+  public description?: string;
 
+  @IsOptional()
   @IsString()
-  public title!: string;
-
-  @IsString()
-  public text!: string;
-
-  @IsPositive()
-  public categoryId!: number;
-
-  @IsPositive()
-  public photoId!: number;
+  public content?: string;
 
 }

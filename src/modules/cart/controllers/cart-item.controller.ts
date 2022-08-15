@@ -25,7 +25,7 @@ export class CartItemController {
   public create(
     @UserDecorator() user: User,
     @Body() createCartItemDto: CreateCartItemDto,
-  ): Promise<CartItem> {
+  ): Promise<void | CartItem> {
     return this.cartItemService.create(user, createCartItemDto);
   }
 

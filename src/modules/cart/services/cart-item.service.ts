@@ -1,44 +1,42 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import type { FindOptionsWhere, ObjectLiteral } from 'typeorm';
-import { Repository } from 'typeorm';
 import type { CreateCartItemDto } from '../dtos/create-cart-item.dto';
 import type ICartItemService from './cart-item.service.abstract';
-import { CartItem } from '../entities';
-import { Product } from '../../products/entities';
+import type { CartItem } from '../entities';
 import type { User } from '../../users/entities';
+import type { Product } from '../../products/entities';
+import ProductRepository from '../../products/repositories/product.repository';
+import CartItemRepository from '../repositories/cart-item.repository';
 
 @Injectable()
 export class CartItemService implements ICartItemService {
 
   constructor(
-    @InjectRepository(CartItem)
-    private cartItemRepository: Repository<CartItem>,
-    @InjectRepository(Product)
-    private productRepository: Repository<Product>,
+    private readonly cartItemRepository: CartItemRepository,
+    private readonly productRepository: ProductRepository,
   ) { }
-  public async create(user: User, createCartItemDto: CreateCartItemDto): Promise<CartItem> {
-    const product = await this.productRepository.findOneBy({
-      id: createCartItemDto.productId,
-    }) as Product;
+  public async create(user: User, createCartItemDto: CreateCartItemDto): Promise<CartItem | void> {
+    try {
+      const product = await this.productRepository.findOneById(createCartItemDto.productId) as Product;
 
-    const upsertResult = await this.cartItemRepository.upsert(
-      {
-        user,
-        product,
-      },
-      { conflictPaths: ['product'] },
-    );
+      const upsertResult = await this.cartItemRepository.addCartItem(user, product);
 
-    const cartItemId = (upsertResult.identifiers[0] as ObjectLiteral).id as number;
+      console.log(upsertResult);
 
-    await this.cartItemRepository.increment(
-      { id: cartItemId },
-      'itemCount',
-      createCartItemDto.itemCount,
-    );
+      const cartItemId = (upsertResult.identifiers[0] as ObjectLiteral).id as number;
 
-    return await this.checkItemCount(cartItemId);
+      await this.cartItemRepository.increment(
+        { id: cartItemId },
+        'itemCount',
+        createCartItemDto.itemCount,
+      );
+
+      return await this.checkItemCount(cartItemId);
+
+    } catch (error) {
+      if (error instanceof Error) throw new InternalServerErrorException(error.message);
+    }
+
   }
 
   public async findAll(user: User): Promise<CartItem[]> {

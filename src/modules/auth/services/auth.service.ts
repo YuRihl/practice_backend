@@ -34,7 +34,7 @@ export class AuthService implements IAuthService {
 
     if (!passwordCheck) throw new UnauthorizedException('Incorrect password');
 
-    return this.signToken(user.id, user.email, user.password);
+    return this.signToken(user.id, user.email);
   }
 
   public async register(userDto: RegisterDto): Promise<{ access_token: string }> {
@@ -54,7 +54,7 @@ export class AuthService implements IAuthService {
         email: userDto.email,
       }) as User;
 
-      return this.signToken(createdUser.id, createdUser.email, createdUser.password);
+      return this.signToken(createdUser.id, createdUser.email);
     } catch (error: unknown) {
 
       if (error instanceof QueryFailedError) {
@@ -66,8 +66,8 @@ export class AuthService implements IAuthService {
     }
   }
 
-  public async signToken(id: number, email: string, password: string): Promise<{ access_token: string }> {
-    const payload = { sub: id, email, password };
+  public async signToken(id: number, email: string): Promise<{ access_token: string }> {
+    const payload = { sub: id, email };
 
     return {
       access_token: await this.jwtService.signAsync(payload, {
