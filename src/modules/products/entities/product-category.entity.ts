@@ -11,12 +11,12 @@ export class ProductCategory {
   public id!: number;
 
   @ApiProperty({ type: () => Product })
-  @ManyToOne(() => Product, (product) => product.categories)
+  @ManyToOne(() => Product, (product) => product.categories, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'product_id' })
   public product!: Product;
 
   @ApiProperty({ type: () => Category })
-  @ManyToOne(() => Category, (category) => category.products)
+  @ManyToOne(() => Category, (category) => category.products, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'category_id' })
   public category!: Category;
 

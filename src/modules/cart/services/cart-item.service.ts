@@ -21,8 +21,6 @@ export class CartItemService implements ICartItemService {
 
       const upsertResult = await this.cartItemRepository.addCartItem(user, product);
 
-      console.log(upsertResult);
-
       const cartItemId = (upsertResult.identifiers[0] as ObjectLiteral).id as number;
 
       await this.cartItemRepository.increment(

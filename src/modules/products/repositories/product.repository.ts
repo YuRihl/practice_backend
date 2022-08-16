@@ -1,5 +1,6 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import type { DeleteResponse, UpdateResponse } from 'src/@types';
 import { ArrayContains, Like, Repository } from 'typeorm';
 import type { CreateProductDto } from '../dtos/create-product.dto';
 import type { UpdateProductDto } from '../dtos/update-product.dto';
@@ -24,7 +25,9 @@ export default class ProductRepository {
           content: true,
         },
         relations: {
-          categories: true,
+          categories: {
+            category: true,
+          },
         },
         where: {
           name: Like(`${query.name}%`),
@@ -94,21 +97,31 @@ export default class ProductRepository {
     }
   }
 
-  public async updateOne(id: number, updateProductDto: UpdateProductDto): Promise<{ message: string } | void> {
+  public async updateOne(id: number, updateProductDto: UpdateProductDto)
+    : Promise<UpdateResponse | void> {
     try {
-      await this.baseProductRepository.update(id, updateProductDto);
+      const product = await this.baseProductRepository.findOneBy({ id });
+      if (!product) throw new NotFoundException();
 
-      return { message: 'The product was updated successfully' };
+      //const mergedProduct = await this.baseProductRepository.merge(product, updateProductDto);
+
+      return {
+        message: 'The product was updated successfully',
+        id: updateProductDto.price as number, updatedAt: 'sometime',
+      };
     } catch (error) {
       if (error instanceof Error) throw new InternalServerErrorException(error.message);
     }
   }
 
-  public async deleteOne(id: number): Promise<{ message: string } | void> {
+  public async deleteOne(id: number): Promise<DeleteResponse | void> {
     try {
-      await this.baseProductRepository.delete(id);
+      const product = await this.baseProductRepository.findOneBy({ id });
+      if (!product) throw new NotFoundException('Product to delete was not found');
 
-      return { message: 'The product was deleted successfully' };
+      const { id: deletedId } = await this.baseProductRepository.remove(product);
+
+      return { message: 'Product was deleted successfully', id: deletedId };
 
     } catch (error) {
       if (error instanceof Error) throw new InternalServerErrorException(error.message);

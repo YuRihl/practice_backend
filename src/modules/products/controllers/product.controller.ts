@@ -16,6 +16,7 @@ import { CreateProductDto } from '../dtos/create-product.dto';
 import type { Product } from '../entities';
 import IProductService from '../services/product.service.abstract';
 import { UpdateProductDto } from '../dtos/update-product.dto';
+import type { DeleteResponse, UpdateResponse } from 'src/@types';
 
 @Controller('products')
 export class ProductController {
@@ -49,13 +50,14 @@ export class ProductController {
   @ApiOkResponse()
   @Patch(':id')
   public updateOneProduct(
-    @Param('id', ParseIntPipe) id: number, @Body() updateProductDto: UpdateProductDto): Promise<{ message: string }> {
-    return this.productService.updateOneProduct(id, updateProductDto) as Promise<{ message: string }>;
+    @Param('id', ParseIntPipe) id: number, @Body() updateProductDto: UpdateProductDto): Promise<UpdateResponse> {
+    return this.productService.updateOneProduct(id, updateProductDto) as Promise<UpdateResponse>;
   }
 
+  @ApiOkResponse()
   @Delete(':id')
-  public deleteOneProduct(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
-    return this.productService.deleteOneProduct(id) as Promise<{ message: string }>;
+  public deleteOneProduct(@Param('id', ParseIntPipe) id: number): Promise<DeleteResponse> {
+    return this.productService.deleteOneProduct(id) as Promise<DeleteResponse>;
   }
 
 }
