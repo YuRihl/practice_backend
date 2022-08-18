@@ -1,26 +1,24 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import type { Category } from '../../categories/entities';
-import { Repository } from 'typeorm';
+import type { DataSource } from 'typeorm';
 import type { Product } from '../entities';
 import { ProductCategory } from '../entities';
+import { InternalServerErrorException } from '@nestjs/common';
+import type { IProductCategoryRepository } from '../interfaces';
 
-@Injectable()
-export default class ProductCategoryRepository {
+export const ProductCategoryRepository = Symbol('PRODUCT_CATEGORY_REPOSITORY');
+export const ProductCategoryRepositoryFactory =
+  (dataSource: DataSource): IProductCategoryRepository =>
+    dataSource.getRepository(ProductCategory).extend({
+      async createOne(product: Product, category: Category): Promise<ProductCategory> {
+        try {
+          const productCategory = await this.create({ product, category });
 
-  constructor(@InjectRepository(ProductCategory)
-  private readonly baseProductCategoryRepository: Repository<ProductCategory>) { }
+          const newProductCategory = await this.save(productCategory);
 
-  public async createOne(product: Product, category: Category): Promise<ProductCategory | void> {
-    try {
-      const productCategory = await this.baseProductCategoryRepository.create({ product, category });
+          return newProductCategory;
+        } catch (error) {
+          throw new InternalServerErrorException((error as Error).message);
+        }
+      },
+    });
 
-      const newProductCategory = await this.baseProductCategoryRepository.save(productCategory);
-
-      return newProductCategory;
-    } catch (error) {
-      if (error instanceof Error) throw new InternalServerErrorException(error.message);
-    }
-  }
-
-}

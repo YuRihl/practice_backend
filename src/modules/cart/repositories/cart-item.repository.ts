@@ -1,23 +1,80 @@
-import { Injectable } from '@nestjs/common';
+import { InternalServerErrorException } from '@nestjs/common';
 import type { Product } from '../../products/entities';
 import type { User } from '../../users/entities';
-import type { InsertResult } from 'typeorm';
-import { Repository } from 'typeorm';
-import type { CartItem } from '../entities';
+import type { DataSource, FindOptionsRelations, FindOptionsSelect, FindOptionsWhere, ObjectLiteral } from 'typeorm';
+import { CartItem } from '../entities';
+import type { ICartItemRepository } from '../interfaces';
 
-@Injectable()
-export default class CartItemRepository extends Repository<CartItem> {
+const selectOptions: FindOptionsSelect<CartItem> = {
+  product: {
+    id: true,
+    name: true,
+    price: true,
+  },
+  itemCount: true,
+  id: true,
+};
 
-  public async addCartItem(user: User, product: Product): Promise<InsertResult> {
-    const upsertResult = await this.upsert(
-      {
-        user,
-        product,
-      },
-      { conflictPaths: ['product'] },
-    );
+const relationOptions: FindOptionsRelations<CartItem> = {
+  product: true,
+};
 
-    return upsertResult;
-  }
+export const CartItemRepository = Symbol('CART_ITEM_REPOSITORY');
 
-}
+export const CartItemRepositoryFactory =
+  (dataSource: DataSource): ICartItemRepository => dataSource.getRepository(CartItem).extend({
+    async findAllBy(where: FindOptionsWhere<CartItem>): Promise<CartItem[]> {
+      try {
+        return await this.find({
+          select: selectOptions,
+          relations: relationOptions,
+          where,
+        });
+      } catch (error) {
+        throw new InternalServerErrorException((error as Error).message);
+      }
+    },
+
+    async findOneById(id: number): Promise<CartItem | null> {
+      try {
+        return await this.findOne({
+          select: selectOptions,
+          relations: relationOptions,
+          where: { id },
+        });
+      } catch (error) {
+        throw new InternalServerErrorException((error as Error).message);
+      }
+    },
+
+    async createOne(user: User, product: Product): Promise<CartItem> {
+      try {
+        const { identifiers } = await this.upsert(
+          { user, product },
+          { conflictPaths: ['product'] },
+        );
+
+        return await this.findOneById({ id: (identifiers[0] as ObjectLiteral).id as number }) as CartItem;
+      } catch (error) {
+        throw new InternalServerErrorException((error as Error).message);
+      }
+    },
+
+    async deleteOne(cartItem: CartItem): Promise<void> {
+      try {
+        await this.remove(cartItem);
+      } catch (error) {
+        throw new InternalServerErrorException((error as Error).message);
+      }
+    },
+
+    async incrementOne(id: number, count: number): Promise<CartItem> {
+      try {
+        await this.increment({ id }, 'itemCount', count);
+
+        return await this.findOneById({ id }) as CartItem;
+      } catch (error) {
+        throw new InternalServerErrorException((error as Error).message);
+      }
+    },
+  });

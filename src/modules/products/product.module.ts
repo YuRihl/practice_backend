@@ -1,20 +1,32 @@
-import { Module } from '@nestjs/common';
-import { ProductService } from './services/product.service';
-import { ProductController } from './controllers/product.controller';
+import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import IProductService from './services/product.service.abstract';
-import ProductRepository from './repositories/product.repository';
+import { ProductController } from './controllers/product.controller';
+import ProductService from './services/product.service.abstract';
+import { ProductServiceImpl } from './services/product.service';
 import { Product, ProductCategory } from './entities';
-import { CategoryModule } from '../categories/category.module';
-import ProductCategoryRepository from './repositories/product-category.repository';
+import { ProductRepository, ProductRepositoryFactory } from './repositories/product.repository';
+import { ProductCategoryRepository, ProductCategoryRepositoryFactory }
+  from './repositories/product-category.repository';
 
+const productService = { provide: ProductService, useClass: ProductServiceImpl };
+
+const productCategoryRepository = {
+  provide: ProductCategoryRepository,
+  useFactory: ProductCategoryRepositoryFactory,
+  inject: ['DATA_SOURCE'],
+};
+
+const productRepository = {
+  provide: ProductRepository,
+  useFactory: ProductRepositoryFactory,
+  inject: ['DATA_SOURCE'],
+};
+
+@Global()
 @Module({
-  imports: [TypeOrmModule.forFeature([Product, ProductCategory]), CategoryModule],
-  exports: [ProductRepository],
+  imports: [TypeOrmModule.forFeature([Product, ProductCategory])],
+  exports: [ProductService],
   controllers: [ProductController],
-  providers: [{
-    provide: IProductService,
-    useClass: ProductService,
-  }, ProductRepository, ProductCategoryRepository],
+  providers: [productService, productRepository, productCategoryRepository],
 })
 export class ProductModule { }

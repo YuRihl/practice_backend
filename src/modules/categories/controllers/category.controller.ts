@@ -1,15 +1,15 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
-import type { DeleteResponse, UpdateResponse } from 'src/@types';
+import type { UpdateResponse } from 'src/@types';
 import { UpdateCategoryDto } from '../dtos';
 import { CreateCategoryDto } from '../dtos';
 import type { Category } from '../entities';
-import ICategoryService from '../services/category.service.abstract';
+import CategoryService from '../services/category.service.abstract';
 
 @Controller('categories')
 export class CategoryController {
 
-  constructor(private readonly categoryService: ICategoryService) { }
+  constructor(private readonly categoryService: CategoryService) { }
 
   @ApiOkResponse()
   @Get()
@@ -37,9 +37,10 @@ export class CategoryController {
   }
 
   @ApiOkResponse()
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
-  public deleteOneCategory(@Param('id', ParseIntPipe) id: number): Promise<DeleteResponse> {
-    return this.categoryService.deleteOneCategory(id) as Promise<DeleteResponse>;
+  public deleteOneCategory(@Param('id', ParseIntPipe) id: number): void {
+    this.categoryService.deleteOneCategory(id);
   }
 
 }

@@ -24,7 +24,7 @@ export class AuthService implements IAuthService {
   ) { }
 
   public async login(userDto: LoginDto): Promise<{ access_token: string }> {
-    const user = await this.userRepository.findOneBy({
+    const user = await this.userRepository.findOneById({
       email: userDto.email,
     });
 
@@ -50,7 +50,7 @@ export class AuthService implements IAuthService {
 
       await this.userRepository.save(userToCreate);
 
-      const createdUser = await this.userRepository.findOneBy({
+      const createdUser = await this.userRepository.findOneById({
         email: userDto.email,
       }) as User;
 

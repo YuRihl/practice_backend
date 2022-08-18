@@ -1,98 +1,71 @@
-import { HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import type { DeleteResponse, UpdateResponse } from 'src/@types';
-import type { ObjectLiteral } from 'typeorm';
-import { Repository } from 'typeorm';
+import { InternalServerErrorException } from '@nestjs/common';
+import type { UpdateResponse } from 'src/@types';
+import type { DataSource, ObjectLiteral } from 'typeorm';
 import type { CreateCategoryDto, UpdateCategoryDto } from '../dtos';
 import { Category } from '../entities';
+import type { ICategoryRepository } from '../interfaces';
 
-@Injectable()
-export default class CategoryRepository {
+export const CategoryRepository = Symbol('CATEGORY_REPOSITORY');
 
-  constructor(@InjectRepository(Category) private readonly baseCategoryRepository: Repository<Category>) { }
+export const CategoryRepositoryFactory =
+  (dataSource: DataSource): ICategoryRepository => dataSource.getRepository(Category).extend({
+    async findAll(): Promise<Category[]> {
+      try {
+        return await this.find({
+          select: {
+            id: true,
+            name: true,
+          },
+        });
+      } catch (error) {
+        throw new InternalServerErrorException((error as Error).message);
+      }
+    },
 
-  public async findAll(): Promise<Category[] | void> {
-    try {
-      const categories = await this.baseCategoryRepository.find({
-        select: {
-          id: true,
-          name: true,
-        },
-      });
+    async findOneById(id: number): Promise<Category | null> {
+      try {
+        return await this.findOne({
+          select: {
+            id: true,
+            name: true,
+          },
+          where: {
+            id,
+          },
+        });
+      } catch (error) {
+        throw new InternalServerErrorException((error as Error).message);
+      }
+    },
 
-      if (!categories.length) throw new NotFoundException('Categories weren\'t found');
-      return categories;
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      if (error instanceof Error) throw new InternalServerErrorException(error.message);
-    }
-  }
+    async createOne(createCategoryDto: CreateCategoryDto): Promise<Category> {
+      try {
 
-  public async findOneById(id: number): Promise<Category | void> {
-    try {
-      const category = await this.baseCategoryRepository.findOne({
-        select: {
-          id: true,
-          name: true,
-        },
-        where: {
-          id,
-        },
-      });
+        const { identifiers } = await this.upsert(createCategoryDto, ['name']);
 
-      if (!category) throw new NotFoundException('Category with given ID was not found');
+        return await this.findOneById({ id: (identifiers[0] as ObjectLiteral).id as number }) as Category;
+      } catch (error) {
+        throw new InternalServerErrorException((error as Error).message);
+      }
+    },
 
-      return category;
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      if (error instanceof Error) throw new InternalServerErrorException(error.message);
-    }
-  }
+    async updateOne(category: Category, updateCategoryDto: UpdateCategoryDto): Promise<UpdateResponse> {
+      try {
+        const mergedCategory = await this.merge(category, updateCategoryDto);
 
-  public async createOne(createCategoryDto: CreateCategoryDto): Promise<Category | void> {
-    try {
+        const { id: updatedId, updatedAt } = await this.save(mergedCategory);
 
-      const { identifiers } = await this.baseCategoryRepository.upsert(createCategoryDto, ['name']);
+        return { message: 'Category was updated successfully', id: updatedId, updatedAt: updatedAt.toISOString() };
+      } catch (error) {
+        throw new InternalServerErrorException((error as Error).message);
+      }
+    },
 
-      const category =
-        await this.baseCategoryRepository.findOneBy({ id: (identifiers[0] as ObjectLiteral).id as number }) as Category;
-
-      return category;
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      if (error instanceof Error) throw new InternalServerErrorException(error.message);
-    }
-  }
-
-  public async updateOne(id: number, updateCategoryDto: UpdateCategoryDto)
-    : Promise<UpdateResponse | void> {
-    try {
-      const category = await this.baseCategoryRepository.findOneBy({ id });
-      if (!category) throw new NotFoundException('Category to update was not found');
-
-      const mergedCategory = await this.baseCategoryRepository.merge(category, updateCategoryDto);
-
-      const { id: updatedId, updatedAt } = await this.baseCategoryRepository.save(mergedCategory);
-
-      return { message: 'Category was updated successfully', id: updatedId, updatedAt: updatedAt.toISOString() };
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      if (error instanceof Error) throw new InternalServerErrorException(error.message);
-    }
-  }
-
-  public async deleteOne(id: number): Promise<DeleteResponse | void> {
-    try {
-      const category = await this.baseCategoryRepository.findOneBy({ id });
-      if (!category) throw new NotFoundException('Category to delete was not found');
-
-      const { id: deletedId } = await this.baseCategoryRepository.remove(category);
-
-      return { message: 'Category was deleted successfully', id: deletedId };
-    } catch (error) {
-      if (error instanceof HttpException) throw error;
-      if (error instanceof Error) throw new InternalServerErrorException(error.message);
-    }
-  }
-
-}
+    async deleteOne(category: Category): Promise<void> {
+      try {
+        await this.remove(category);
+      } catch (error) {
+        throw new InternalServerErrorException((error as Error).message);
+      }
+    },
+  });

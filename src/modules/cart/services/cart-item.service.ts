@@ -1,119 +1,76 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import type { FindOptionsWhere, ObjectLiteral } from 'typeorm';
+import { HttpException, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import type { CreateCartItemDto } from '../dtos/create-cart-item.dto';
-import type ICartItemService from './cart-item.service.abstract';
+import type CartItemService from './cart-item.service.abstract';
 import type { CartItem } from '../entities';
 import type { User } from '../../users/entities';
-import type { Product } from '../../products/entities';
-import ProductRepository from '../../products/repositories/product.repository';
-import CartItemRepository from '../repositories/cart-item.repository';
+import { CartItemRepository } from '../repositories/cart-item.repository';
+import { ICartItemRepository } from '../interfaces';
+import ProductService from 'src/modules/products/services/product.service.abstract';
 
 @Injectable()
-export class CartItemService implements ICartItemService {
+export class CartItemServiceImpl implements CartItemService {
 
   constructor(
-    private readonly cartItemRepository: CartItemRepository,
-    private readonly productRepository: ProductRepository,
+    @Inject(CartItemRepository) private readonly cartItemRepository: ICartItemRepository,
+    @Inject(ProductService) private readonly productService: ProductService,
   ) { }
-  public async create(user: User, createCartItemDto: CreateCartItemDto): Promise<CartItem | void> {
+
+  public async findAllCartItems(user: User): Promise<CartItem[]> {
     try {
-      const product = await this.productRepository.findOneById(createCartItemDto.productId) as Product;
+      return await this.cartItemRepository.findAllBy({ user: { id: user.id } });
+    } catch (error) {
+      throw error instanceof HttpException ? error : new InternalServerErrorException((error as Error).message);
+    }
+  }
 
-      const upsertResult = await this.cartItemRepository.addCartItem(user, product);
+  public async findOneCartItem(id: number): Promise<CartItem> {
+    try {
+      const cartItem = await this.cartItemRepository.findOneById(id);
+      if (!cartItem) throw new NotFoundException('Cart item with given ID was not found');
 
-      const cartItemId = (upsertResult.identifiers[0] as ObjectLiteral).id as number;
+      return cartItem;
+    } catch (error) {
+      throw error instanceof HttpException ? error : new InternalServerErrorException((error as Error).message);
+    }
+  }
 
-      await this.cartItemRepository.increment(
-        { id: cartItemId },
-        'itemCount',
-        createCartItemDto.itemCount,
-      );
+  public async createOneCartItem(user: User, createCartItemDto: CreateCartItemDto): Promise<CartItem | void> {
+    try {
+      const product = await this.productService.findOneProduct(createCartItemDto.productId);
 
-      return await this.checkItemCount(cartItemId);
+      const createResult = await this.cartItemRepository.createOne(user, product);
+
+      const cartItem = await this.cartItemRepository.incrementOne(createResult.id, createCartItemDto.itemCount);
+
+      return await this.checkItemCount(cartItem);
 
     } catch (error) {
-      if (error instanceof Error) throw new InternalServerErrorException(error.message);
+      throw error instanceof HttpException ? error : new InternalServerErrorException((error as Error).message);
     }
 
   }
 
-  public async findAll(user: User): Promise<CartItem[]> {
-    const cartItems = await this.getCartItems({ user: { id: user.id } });
+  public async deleteOneCartItem(id: number): Promise<void> {
+    try {
+      const cartItem = await this.cartItemRepository.findOneById(id);
+      if (!cartItem) throw new NotFoundException('Cart item to delete was not found');
 
-    return cartItems;
-  }
-
-  public async findOne(user: User, id: number): Promise<CartItem> {
-    const cartItem = await this.getCartItem({ user: { id: user.id }, id });
-
-    if (!cartItem) throw new NotFoundException();
-
-    return cartItem;
-  }
-
-  public async remove(user: User, id: number): Promise<CartItem> {
-    const cartItem = await this.getCartItem({ user: { id: user.id }, id });
-
-    if (!cartItem) throw new NotFoundException();
-
-    const deletedCartItem = await this.cartItemRepository.remove(cartItem);
-
-    return deletedCartItem;
-  }
-
-  public async checkItemCount(id: number): Promise<CartItem> {
-    const cartItem = await this.getCartItem({ id });
-
-    if (!cartItem) throw new NotFoundException();
-
-    if (cartItem.itemCount <= 0) {
-      const removedCartItem = await this.cartItemRepository.remove(cartItem);
-      return removedCartItem;
+      await this.cartItemRepository.remove(cartItem);
+    } catch (error) {
+      throw error instanceof HttpException ? error : new InternalServerErrorException((error as Error).message);
     }
-
-    return await this.getCartItem({ id: cartItem.id }) as CartItem;
   }
 
-  public async getCartItem(options: FindOptionsWhere<CartItem>): Promise<CartItem> {
-    const returnedCartItem = await this.cartItemRepository.findOne({
-      select: {
-        product: {
-          id: true,
-          name: true,
-          price: true,
-        },
-        itemCount: true,
-        id: true,
-      },
-      relations: {
-        product: true,
-      },
-      where: options,
-    });
+  public async checkItemCount(cartItem: CartItem): Promise<CartItem | void> {
+    try {
+      if (cartItem.itemCount <= 0) {
+        await this.cartItemRepository.remove(cartItem);
+      }
 
-    if (!returnedCartItem) throw new NotFoundException();
+      return cartItem;
+    } catch (error) {
 
-    return returnedCartItem;
-  }
-
-  public async getCartItems(options: FindOptionsWhere<CartItem>): Promise<CartItem[]> {
-    const returnedCartItem = await this.cartItemRepository.find({
-      select: {
-        product: {
-          id: true,
-          name: true,
-          price: true,
-        },
-        itemCount: true,
-        id: true,
-      },
-      relations: {
-        product: true,
-      },
-      where: options,
-    });
-
-    return returnedCartItem;
+    }
   }
 
 }

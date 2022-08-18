@@ -1,131 +1,102 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import type { DeleteResponse, UpdateResponse } from 'src/@types';
-import { ArrayContains, Like, Repository } from 'typeorm';
+import { InternalServerErrorException } from '@nestjs/common';
+import { ArrayContains, Like } from 'typeorm';
+import { Product } from '../entities';
+import type { UpdateResponse } from 'src/@types';
+import type { DataSource, FindOptionsSelect, FindOptionsRelations } from 'typeorm';
 import type { CreateProductDto } from '../dtos/create-product.dto';
 import type { UpdateProductDto } from '../dtos/update-product.dto';
-import { Product } from '../entities';
 import type { ProductWhere } from '../interfaces';
+import type { IProductRepository } from '../interfaces';
 
-@Injectable()
-export default class ProductRepository {
+const selectOptions: FindOptionsSelect<Product> = {
+  id: true,
+  name: true,
+  price: true,
+  availableCount: true,
+  soldCount: true,
+  description: true,
+  content: true,
+};
 
-  constructor(@InjectRepository(Product) private readonly baseProductRepository: Repository<Product>) { }
+const relationOptions: FindOptionsRelations<Product> = {
+  categories: {
+    category: true,
+  },
+};
 
-  public async findAllBy(query: ProductWhere): Promise<Product[] | void> {
-    try {
-      const products = await this.baseProductRepository.find({
-        select: {
-          id: true,
-          name: true,
-          price: true,
-          availableCount: true,
-          soldCount: true,
-          description: true,
-          content: true,
-        },
-        relations: {
-          categories: {
-            category: true,
+export const ProductRepository = Symbol('PRODUCT_REPOSITORY');
+
+export const ProductRepositoryFactory =
+  (dataSource: DataSource): IProductRepository => dataSource.getRepository(Product).extend({
+    async findAllBy(query: ProductWhere): Promise<Product[]> {
+      try {
+        return await this.find({
+          select: selectOptions,
+          relations: relationOptions,
+          where: {
+            name: Like(`${query.name}%`),
+            categories: ArrayContains(query.categories),
           },
-        },
-        where: {
-          name: Like(`${query.name}%`),
-          categories: ArrayContains(query.categories),
-        },
-        order: {
-          id: 'asc',
-        },
-        skip: query.skip,
-        take: query.take,
-      });
+          order: {
+            id: 'asc',
+          },
+          skip: query.skip,
+          take: query.take,
+        });
+      } catch (error) {
+        throw new InternalServerErrorException((error as Error).message);
+      }
+    },
 
-      if (!products.length) throw new NotFoundException('Products weren\'t found');
+    async findOneById(id: number): Promise<Product | null> {
+      try {
+        return await this.findOne({
+          select: selectOptions,
+          relations: relationOptions,
+          where: { id },
+        });
+      } catch (error) {
+        throw new InternalServerErrorException((error as Error).message);
+      }
+    },
 
-      return products;
-    } catch (error) {
-      if (error instanceof Error) throw new InternalServerErrorException(error.message);
-    }
+    async createOne(createProductDto: CreateProductDto): Promise<Product> {
+      try {
+        const product = await this.create({
+          name: createProductDto.name,
+          price: createProductDto.price,
+          availableCount: createProductDto.availableCount,
+          soldCount: createProductDto.soldCount,
+          description: createProductDto.description,
+          content: createProductDto.content,
+        });
 
-  }
+        const newProduct = await this.save(product);
 
-  public async findOneById(id: number): Promise<Product | void> {
-    try {
-      const product = await this.baseProductRepository.findOne({
-        select: {
-          id: true,
-          name: true,
-          price: true,
-          availableCount: true,
-          soldCount: true,
-          description: true,
-          content: true,
-        },
-        relations: {
-          categories: true,
-        },
-        where: {
-          id,
-        },
-      });
+        return newProduct;
+      } catch (error) {
+        throw new InternalServerErrorException((error as Error).message);
+      }
+    },
 
-      if (!product) throw new NotFoundException('Product with given ID was not found');
+    async updateOne(product: Product, updateProductDto: UpdateProductDto): Promise<UpdateResponse> {
+      try {
+        await this.merge(product, {});
 
-      return product;
-    } catch (error) {
-      if (error instanceof Error) throw new InternalServerErrorException(error.message);
-    }
+        return {
+          message: 'The product was updated successfully',
+          id: updateProductDto.price as number, updatedAt: 'sometime',
+        };
+      } catch (error) {
+        throw new InternalServerErrorException((error as Error).message);
+      }
+    },
 
-  }
-
-  public async createOne(createProductDto: CreateProductDto): Promise<Product | void> {
-    try {
-      const product = await this.baseProductRepository.create({
-        name: createProductDto.name,
-        price: createProductDto.price,
-        availableCount: createProductDto.availableCount,
-        soldCount: createProductDto.soldCount,
-        description: createProductDto.description,
-        content: createProductDto.content,
-      });
-
-      const newProduct = await this.baseProductRepository.save(product);
-
-      return newProduct;
-    } catch (error) {
-      if (error instanceof Error) throw new InternalServerErrorException(error.message);
-    }
-  }
-
-  public async updateOne(id: number, updateProductDto: UpdateProductDto)
-    : Promise<UpdateResponse | void> {
-    try {
-      const product = await this.baseProductRepository.findOneBy({ id });
-      if (!product) throw new NotFoundException();
-
-      //const mergedProduct = await this.baseProductRepository.merge(product, updateProductDto);
-
-      return {
-        message: 'The product was updated successfully',
-        id: updateProductDto.price as number, updatedAt: 'sometime',
-      };
-    } catch (error) {
-      if (error instanceof Error) throw new InternalServerErrorException(error.message);
-    }
-  }
-
-  public async deleteOne(id: number): Promise<DeleteResponse | void> {
-    try {
-      const product = await this.baseProductRepository.findOneBy({ id });
-      if (!product) throw new NotFoundException('Product to delete was not found');
-
-      const { id: deletedId } = await this.baseProductRepository.remove(product);
-
-      return { message: 'Product was deleted successfully', id: deletedId };
-
-    } catch (error) {
-      if (error instanceof Error) throw new InternalServerErrorException(error.message);
-    }
-  }
-
-}
+    async deleteOne(product: Product): Promise<void> {
+      try {
+        await this.remove(product);
+      } catch (error) {
+        throw new InternalServerErrorException((error as Error).message);
+      }
+    },
+  });

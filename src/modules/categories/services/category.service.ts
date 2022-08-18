@@ -1,64 +1,65 @@
-import { HttpException, Injectable, InternalServerErrorException } from '@nestjs/common';
-import type { DeleteResponse, UpdateResponse } from 'src/@types';
+import { HttpException, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import type { UpdateResponse } from 'src/@types';
 import type { CreateCategoryDto, UpdateCategoryDto } from '../dtos';
 import type { Category } from '../entities';
-import CategoryRepository from '../repositories/category.repository';
-import type ICategoryService from './category.service.abstract';
+import { ICategoryRepository } from '../interfaces';
+import { CategoryRepository } from '../repositories/category.repository';
+import CategoryService from './category.service.abstract';
 
 @Injectable()
-export class CategoryService implements ICategoryService {
+export class CategoryServiceImpl extends CategoryService {
 
-  constructor(private categoryRepository: CategoryRepository) { }
+  constructor(@Inject(CategoryRepository) private categoryRepository: ICategoryRepository) {
+    super();
+  }
 
-  public async findAllCategories(): Promise<Category[] | void> {
+  public async findAllCategories(): Promise<Category[]> {
     try {
-      const categories = this.categoryRepository.findAll();
-
-      return categories;
+      return await this.categoryRepository.findAll();
     } catch (error) {
-      if (error instanceof HttpException) throw error;
-      if (error instanceof Error) throw new InternalServerErrorException(error.message);
+      throw error instanceof HttpException ? error : new InternalServerErrorException((error as Error).message);
     }
   }
 
-  public async findOneCategory(id: number): Promise<void | Category> {
+  public async findOneCategory(id: number): Promise<Category> {
     try {
-      const category = this.categoryRepository.findOneById(id);
+      const category = await this.categoryRepository.findOneById(id);
+
+      if (!category) throw new NotFoundException('Category with given ID was not found');
 
       return category;
     } catch (error) {
-      if (error instanceof HttpException) throw error;
-      if (error instanceof Error) throw new InternalServerErrorException(error.message);
+      throw error instanceof HttpException ? error : new InternalServerErrorException((error as Error).message);
     }
   }
 
-  public async createOneCategory(createCategoryDto: CreateCategoryDto): Promise<void | Category> {
+  public async createOneCategory(createCategoryDto: CreateCategoryDto): Promise<Category> {
     try {
-      const category = this.categoryRepository.createOne(createCategoryDto);
-
-      return category;
+      return await this.categoryRepository.createOne(createCategoryDto);
     } catch (error) {
-      if (error instanceof HttpException) throw error;
-      if (error instanceof Error) throw new InternalServerErrorException(error.message);
+      throw error instanceof HttpException ? error : new InternalServerErrorException((error as Error).message);
     }
   }
 
-  public async updateOneCategory(id: number, updateCategoryDto: UpdateCategoryDto)
-    : Promise<UpdateResponse | void> {
+  public async updateOneCategory(id: number, updateCategoryDto: UpdateCategoryDto): Promise<UpdateResponse> {
     try {
-      return this.categoryRepository.updateOne(id, updateCategoryDto);
+      const category = await this.categoryRepository.findOneById({ id });
+      if (!category) throw new NotFoundException('Category to update was not found');
+
+      return await this.categoryRepository.updateOne(category, updateCategoryDto);
     } catch (error) {
-      if (error instanceof HttpException) throw error;
-      if (error instanceof Error) throw new InternalServerErrorException(error.message);
+      throw error instanceof HttpException ? error : new InternalServerErrorException((error as Error).message);
     }
   }
 
-  public async deleteOneCategory(id: number): Promise<DeleteResponse | void> {
+  public async deleteOneCategory(id: number): Promise<void> {
     try {
-      return this.categoryRepository.deleteOne(id);
+      const category = await this.categoryRepository.findOneById({ id });
+      if (!category) throw new NotFoundException('Category to delete was not found');
+
+      await this.categoryRepository.deleteOne(category);
     } catch (error) {
-      if (error instanceof HttpException) throw error;
-      if (error instanceof Error) throw new InternalServerErrorException(error.message);
+      throw error instanceof HttpException ? error : new InternalServerErrorException((error as Error).message);
     }
   }
 

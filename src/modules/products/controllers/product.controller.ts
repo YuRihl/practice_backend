@@ -11,17 +11,19 @@ import {
   ParseArrayPipe,
   Patch,
   Delete,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { CreateProductDto } from '../dtos/create-product.dto';
 import type { Product } from '../entities';
-import IProductService from '../services/product.service.abstract';
+import ProductService from '../services/product.service.abstract';
 import { UpdateProductDto } from '../dtos/update-product.dto';
-import type { DeleteResponse, UpdateResponse } from 'src/@types';
+import type { UpdateResponse } from 'src/@types';
 
 @Controller('products')
 export class ProductController {
 
-  constructor(private readonly productService: IProductService) { }
+  constructor(private readonly productService: ProductService) { }
 
   @ApiOkResponse()
   @Get()
@@ -55,9 +57,10 @@ export class ProductController {
   }
 
   @ApiOkResponse()
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
-  public deleteOneProduct(@Param('id', ParseIntPipe) id: number): Promise<DeleteResponse> {
-    return this.productService.deleteOneProduct(id) as Promise<DeleteResponse>;
+  public deleteOneProduct(@Param('id', ParseIntPipe) id: number): void {
+    this.productService.deleteOneProduct(id);
   }
 
 }
