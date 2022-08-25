@@ -1,9 +1,11 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import type { UpdateResponse } from 'src/@types';
-import type { DataSource, ObjectLiteral } from 'typeorm';
+import type { DataSource, FindOptionsSelect, ObjectLiteral } from 'typeorm';
 import type { CreateCategoryDto, UpdateCategoryDto } from '../dtos';
 import { Category } from '../entities';
 import type { ICategoryRepository } from '../interfaces';
+
+const selectOptions: FindOptionsSelect<Category> = { id: true, name: true };
 
 export const CategoryRepository = Symbol('CATEGORY_REPOSITORY');
 
@@ -12,26 +14,18 @@ export const CategoryRepositoryFactory =
     async findAll(): Promise<Category[]> {
       try {
         return await this.find({
-          select: {
-            id: true,
-            name: true,
-          },
+          select: selectOptions,
         });
       } catch (error) {
         throw new InternalServerErrorException((error as Error).message);
       }
     },
 
-    async findOneById(id: number): Promise<Category | null> {
+    async findById(id: number): Promise<Category | null> {
       try {
         return await this.findOne({
-          select: {
-            id: true,
-            name: true,
-          },
-          where: {
-            id,
-          },
+          select: selectOptions,
+          where: { id },
         });
       } catch (error) {
         throw new InternalServerErrorException((error as Error).message);
@@ -43,7 +37,7 @@ export const CategoryRepositoryFactory =
 
         const { identifiers } = await this.upsert(createCategoryDto, ['name']);
 
-        return await this.findOneById({ id: (identifiers[0] as ObjectLiteral).id as number }) as Category;
+        return await this.findById((((identifiers[0] as ObjectLiteral).id as number))) as Category;
       } catch (error) {
         throw new InternalServerErrorException((error as Error).message);
       }

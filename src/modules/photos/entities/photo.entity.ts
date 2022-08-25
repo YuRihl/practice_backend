@@ -11,7 +11,7 @@ export class Photo {
   @PrimaryGeneratedColumn('increment')
   public id!: number;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', default: '' })
   public path!: string;
 
   @Column({ type: 'varchar' })
@@ -19,6 +19,9 @@ export class Photo {
 
   @Column({ type: 'int' })
   public size!: number;
+
+  @Column({ type: 'varchar', default: '' })
+  public key!: string;
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   public createdAt!: Date;

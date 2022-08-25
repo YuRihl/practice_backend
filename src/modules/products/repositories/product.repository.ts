@@ -48,7 +48,7 @@ export const ProductRepositoryFactory =
       }
     },
 
-    async findOneById(id: number): Promise<Product | null> {
+    async findById(id: number): Promise<Product | null> {
       try {
         return await this.findOne({
           select: selectOptions,
@@ -60,16 +60,9 @@ export const ProductRepositoryFactory =
       }
     },
 
-    async createOne(createProductDto: CreateProductDto): Promise<Product> {
+    async createOne(createProductDto: Omit<CreateProductDto, 'categories'>): Promise<Product> {
       try {
-        const product = await this.create({
-          name: createProductDto.name,
-          price: createProductDto.price,
-          availableCount: createProductDto.availableCount,
-          soldCount: createProductDto.soldCount,
-          description: createProductDto.description,
-          content: createProductDto.content,
-        });
+        const product = await this.create(createProductDto);
 
         const newProduct = await this.save(product);
 
@@ -79,13 +72,15 @@ export const ProductRepositoryFactory =
       }
     },
 
-    async updateOne(product: Product, updateProductDto: UpdateProductDto): Promise<UpdateResponse> {
+    async updateOne(product: Product, updateProductDto: Omit<UpdateProductDto, 'categories'>): Promise<UpdateResponse> {
       try {
-        await this.merge(product, {});
+        const newProduct = await this.merge(product, updateProductDto);
+
+        const { id, updatedAt } = await this.save(newProduct);
 
         return {
-          message: 'The product was updated successfully',
-          id: updateProductDto.price as number, updatedAt: 'sometime',
+          message: 'Product was updated successfully',
+          id, updatedAt: updatedAt.toISOString(),
         };
       } catch (error) {
         throw new InternalServerErrorException((error as Error).message);

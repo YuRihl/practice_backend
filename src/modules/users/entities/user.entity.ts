@@ -5,7 +5,6 @@ import {
   CreateDateColumn,
   Entity,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -39,8 +38,8 @@ export class User {
   @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
   public updatedAt!: Date;
 
-  @OneToOne(() => Order, (order) => order.user)
-  public order!: Order;
+  @OneToMany(() => Order, (order) => order.user)
+  public orders!: Order[];
 
   @OneToMany(() => CartItem, (cartItem) => cartItem.user)
   public cartItems!: CartItem[];

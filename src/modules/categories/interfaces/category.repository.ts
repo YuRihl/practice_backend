@@ -5,7 +5,7 @@ import type { Category } from '../entities';
 
 interface CustomRepository {
   findAll(): Promise<Category[]>;
-  findOneById(id: number): Promise<Category | null>;
+  findById(id: number): Promise<Category | null>;
   createOne(createCategoryDto: CreateCategoryDto): Promise<Category>;
   updateOne(category: Category, updateCategoryDto: UpdateCategoryDto): Promise<UpdateResponse>;
   deleteOne(category: Category): Promise<void>;

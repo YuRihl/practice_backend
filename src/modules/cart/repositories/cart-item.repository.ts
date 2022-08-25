@@ -1,7 +1,7 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import type { Product } from '../../products/entities';
 import type { User } from '../../users/entities';
-import type { DataSource, FindOptionsRelations, FindOptionsSelect, FindOptionsWhere, ObjectLiteral } from 'typeorm';
+import type { DataSource, FindOptionsRelations, FindOptionsSelect, FindOptionsWhere } from 'typeorm';
 import { CartItem } from '../entities';
 import type { ICartItemRepository } from '../interfaces';
 
@@ -35,12 +35,12 @@ export const CartItemRepositoryFactory =
       }
     },
 
-    async findOneById(id: number): Promise<CartItem | null> {
+    async findById(userId: number, id: number): Promise<CartItem | null> {
       try {
         return await this.findOne({
           select: selectOptions,
           relations: relationOptions,
-          where: { id },
+          where: { id, user: { id: userId } },
         });
       } catch (error) {
         throw new InternalServerErrorException((error as Error).message);
@@ -49,12 +49,14 @@ export const CartItemRepositoryFactory =
 
     async createOne(user: User, product: Product): Promise<CartItem> {
       try {
-        const { identifiers } = await this.upsert(
-          { user, product },
-          { conflictPaths: ['product'] },
-        );
+        const cartItem = await this.findOne({ where: { user: { id: user.id }, product: { id: product.id } } });
 
-        return await this.findOneById({ id: (identifiers[0] as ObjectLiteral).id as number }) as CartItem;
+        if (!cartItem) {
+          const newCartItem = await this.create({ user, product });
+          return await this.save(newCartItem);
+        }
+
+        return cartItem;
       } catch (error) {
         throw new InternalServerErrorException((error as Error).message);
       }
@@ -68,11 +70,11 @@ export const CartItemRepositoryFactory =
       }
     },
 
-    async incrementOne(id: number, count: number): Promise<CartItem> {
+    async incrementOne(userId: number, id: number, count: number): Promise<CartItem> {
       try {
         await this.increment({ id }, 'itemCount', count);
 
-        return await this.findOneById({ id }) as CartItem;
+        return await this.findById(userId, id) as CartItem;
       } catch (error) {
         throw new InternalServerErrorException((error as Error).message);
       }

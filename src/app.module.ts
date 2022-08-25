@@ -1,3 +1,5 @@
+import type { Provider } from '@nestjs/common';
+import { Global } from '@nestjs/common';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ConfigModule } from '@nestjs/config';
@@ -12,6 +14,29 @@ import { OrderModule } from './modules/orders/order.module';
 import { configModuleConfig } from './config/module-configs/config.module.config';
 import { DataSource } from 'typeorm';
 
+const dataSourceService: Provider = {
+  provide: 'DATA_SOURCE',
+  inject: [ConfigService],
+  useFactory: async (configService: ConfigService): Promise<DataSource> => {
+    const dataSource = new DataSource({
+      type: 'postgres',
+      host: configService.get<string>('DB_HOST'),
+      port: configService.get<number>('DB_PORT'),
+      database: configService.get<string>('DB_NAME'),
+      username: configService.get<string>('DB_USER'),
+      password: configService.get<string>('DB_PASSWORD'),
+      entities: ['dist/**/entities/*.entity.js'],
+      migrations: ['dist/migrations/*.js'],
+      migrationsTableName: 'typeorm_migrations',
+      logging: true,
+      synchronize: true,
+    });
+
+    return dataSource.initialize();
+  },
+};
+
+@Global()
 @Module({
   imports: [
     TypeOrmModule,
@@ -24,29 +49,8 @@ import { DataSource } from 'typeorm';
     CategoryModule,
     OrderModule,
   ],
+  exports: [dataSourceService],
   controllers: [],
-  providers: [
-    {
-      provide: 'DATA_SOURCE',
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService): Promise<DataSource> => {
-        const dataSource = new DataSource({
-          type: 'postgres',
-          host: configService.get<string>('DB_HOST'),
-          port: configService.get<number>('DB_PORT'),
-          database: configService.get<string>('DB_NAME'),
-          username: configService.get<string>('DB_USER'),
-          password: configService.get<string>('DB_PASSWORD'),
-          entities: ['dist/**/entities/*.entity.js'],
-          migrations: ['dist/migrations/*.js'],
-          migrationsTableName: 'typeorm_migrations',
-          logging: true,
-          synchronize: true,
-        });
-
-        return dataSource.initialize();
-      },
-    },
-  ],
+  providers: [dataSourceService],
 })
 export class AppModule { }

@@ -1,6 +1,6 @@
 import type { LoginDto, RegisterDto } from '../dtos';
 
-export default abstract class IAuthService {
+export default abstract class AuthService {
 
   public abstract login(userDto: LoginDto): Promise<{ access_token: string }>;
   public abstract register(userDto: RegisterDto): Promise<{ access_token: string }>;

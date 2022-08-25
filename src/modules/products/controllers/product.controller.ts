@@ -1,4 +1,4 @@
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse } from '@nestjs/swagger';
 import {
   Controller,
   Get,
@@ -56,7 +56,7 @@ export class ProductController {
     return this.productService.updateOneProduct(id, updateProductDto) as Promise<UpdateResponse>;
   }
 
-  @ApiOkResponse()
+  @ApiNoContentResponse()
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   public deleteOneProduct(@Param('id', ParseIntPipe) id: number): void {

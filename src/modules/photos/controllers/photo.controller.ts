@@ -1,21 +1,39 @@
 import {
   Controller,
   Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  UploadedFile,
+  UseGuards,
   UseInterceptors,
-  ClassSerializerInterceptor,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { User } from '../../users/entities';
+import { UserDecorator } from '../../../@framework/decorators';
+import { JwtGuard } from '../../../@framework/guards';
 import type { Photo } from '../entities';
-import IPhotoService from '../services/photo.service.abstract';
+import PhotoService from '../services/photo.service.abstract';
 
 @Controller('photos')
-@UseInterceptors(ClassSerializerInterceptor)
 export class PhotoController {
 
-  constructor(private readonly photoService: IPhotoService) { }
+  constructor(private readonly photoService: PhotoService) { }
 
-  @Get('product/:id')
-  public findProductPhoto(): Promise<Photo> {
-    return this.photoService.findProductPhoto(1);
+  @ApiOkResponse()
+  @Get(':id')
+  public findOnePhoto(@Param('id', ParseIntPipe) id: number): Promise<Photo> {
+    return this.photoService.findOnePhoto(id);
+  }
+
+  @ApiCreatedResponse()
+  @ApiConsumes('multipart/form-data')
+  @UseGuards(JwtGuard)
+  @Post()
+  @UseInterceptors(FileInterceptor('photo'))
+  public createUserPhoto(@UserDecorator() user: User, @UploadedFile() photo: Express.Multer.File): Promise<Photo> {
+    return this.photoService.createUserPhoto(user.id, photo.buffer, photo.size, photo.mimetype);
   }
 
 }

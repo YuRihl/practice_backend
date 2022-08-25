@@ -1,13 +1,16 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany,
+  PrimaryGeneratedColumn, UpdateDateColumn,
+} from 'typeorm';
 import { User } from '../../users/entities';
 import { OrderItem } from '.';
 
 export enum OrderStatus {
-  Pending,
-  Processing,
-  Completed,
-  Declined,
-  Failed
+  Pending = 'Pending',
+  Processing = 'Processing',
+  Completed = 'Completed',
+  Declined = 'Declined',
+  Failed = 'Failed'
 }
 
 @Entity()
@@ -22,7 +25,10 @@ export class Order {
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   public createdAt!: Date;
 
-  @OneToOne(() => User, (user) => user.order)
+  @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
+  public updatedAt!: Date;
+
+  @ManyToOne(() => User, (user) => user.orders, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   public user!: User;
 

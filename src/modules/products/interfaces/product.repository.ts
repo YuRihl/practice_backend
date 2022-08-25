@@ -6,7 +6,7 @@ import type { ProductWhere } from './product-where.interface';
 
 interface CustomRepository {
   findAllBy(query: ProductWhere): Promise<Product[]>;
-  findOneById(id: number): Promise<Product | null>;
+  findById(id: number): Promise<Product | null>;
   createOne(createProductDto: CreateProductDto): Promise<Product>;
   updateOne(product: Product, updateProductDto: UpdateProductDto): Promise<UpdateResponse>;
   deleteOne(product: Product): Promise<void>;

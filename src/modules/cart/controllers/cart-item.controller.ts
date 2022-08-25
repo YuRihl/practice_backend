@@ -26,33 +26,33 @@ export class CartItemController {
   @ApiOkResponse()
   @UseGuards(JwtGuard)
   @Get()
-  public findAll(@UserDecorator() user: User): Promise<CartItem[]> {
-    return this.cartItemService.findAll(user);
+  public findAllCartItems(@UserDecorator() user: User): Promise<CartItem[]> {
+    return this.cartItemService.findAllCartItems(user);
   }
 
   @ApiOkResponse()
   @UseGuards(JwtGuard)
   @Get(':id')
-  public findOne(@Param('id', ParseIntPipe) id: number): Promise<CartItem> {
-    return this.cartItemService.findOne(id);
+  public findOneCartItem(@UserDecorator() user: User, @Param('id', ParseIntPipe) id: number): Promise<CartItem> {
+    return this.cartItemService.findOneCartItem(user, id);
   }
 
   @ApiCreatedResponse()
   @UseGuards(JwtGuard)
   @Post()
-  public create(
+  public createOneCartItem(
     @UserDecorator() user: User,
     @Body() createCartItemDto: CreateCartItemDto,
   ): Promise<CartItem | void> {
-    return this.cartItemService.create(user, createCartItemDto);
+    return this.cartItemService.createOneCartItem(user, createCartItemDto);
   }
 
   @ApiNoContentResponse()
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtGuard)
   @Delete(':id')
-  public remove(@Param('id', ParseIntPipe) id: number): void {
-    this.cartItemService.remove(id);
+  public deleteOneCartItem(@UserDecorator() user: User, @Param('id', ParseIntPipe) id: number): void {
+    this.cartItemService.deleteOneCartItem(user, id);
   }
 
 }

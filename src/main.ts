@@ -5,10 +5,11 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './@framework/filters/http-exception.filter';
 import { AppModule } from './app.module';
+import { config } from 'aws-sdk';
 
 async function bootstrap(): Promise<void> {
   const app: NestExpressApplication = await NestFactory.create(AppModule, {
-    cors: true,
+    cors: true, logger: ['warn', 'error', 'log', 'debug', 'verbose'],
   });
 
   // initialize validation pipe
@@ -17,8 +18,16 @@ async function bootstrap(): Promise<void> {
   app.useGlobalFilters(new HttpExceptionFilter());
 
   // getting .env port
-  const config: ConfigService = app.get(ConfigService);
-  const port: number = config.get<number>('PORT') ?? 5000;
+  const configService: ConfigService = app.get(ConfigService);
+  const port: number = configService.get<number>('PORT') ?? 5000;
+
+  config.update({
+    credentials: {
+      accessKeyId: configService.get<string>('AWS_ACCESS_KEY_ID') as string,
+      secretAccessKey: configService.get<string>('AWS_SECRET_ACCESS_KEY') as string,
+    },
+    region: configService.get<string>('AWS_REGION'),
+  });
 
   // swagger initialize
   const documentConfig = new DocumentBuilder()

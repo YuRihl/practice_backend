@@ -23,7 +23,7 @@ export class CategoryServiceImpl extends CategoryService {
 
   public async findOneCategory(id: number): Promise<Category> {
     try {
-      const category = await this.categoryRepository.findOneById(id);
+      const category = await this.categoryRepository.findById(id);
 
       if (!category) throw new NotFoundException('Category with given ID was not found');
 
@@ -43,7 +43,7 @@ export class CategoryServiceImpl extends CategoryService {
 
   public async updateOneCategory(id: number, updateCategoryDto: UpdateCategoryDto): Promise<UpdateResponse> {
     try {
-      const category = await this.categoryRepository.findOneById({ id });
+      const category = await this.categoryRepository.findById(id);
       if (!category) throw new NotFoundException('Category to update was not found');
 
       return await this.categoryRepository.updateOne(category, updateCategoryDto);
@@ -54,7 +54,7 @@ export class CategoryServiceImpl extends CategoryService {
 
   public async deleteOneCategory(id: number): Promise<void> {
     try {
-      const category = await this.categoryRepository.findOneById({ id });
+      const category = await this.categoryRepository.findById(id);
       if (!category) throw new NotFoundException('Category to delete was not found');
 
       await this.categoryRepository.deleteOne(category);

@@ -1,7 +1,8 @@
 import type { Photo } from '../entities';
 
-export default abstract class IPhotoService {
+export default abstract class PhotoService {
 
-  public abstract findProductPhoto(id: number): Promise<Photo>;
+  public abstract findOnePhoto(id: number): Promise<Photo>;
+  public abstract createUserPhoto(userId: number, buffer: Buffer, size: number, mimetype: string): Promise<Photo>
 
 }

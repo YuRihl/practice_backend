@@ -5,10 +5,10 @@ import type { CartItem } from '../entities';
 
 interface CustomRepository {
   findAllBy(where: FindOptionsWhere<CartItem>): Promise<CartItem[]>;
-  findOneById(id: number): Promise<CartItem | null>;
+  findById(userId: number, id: number): Promise<CartItem | null>;
   createOne(user: User, product: Product): Promise<CartItem>;
   deleteOne(cartItem: CartItem): Promise<void>;
-  incrementOne(id: number, count: number): Promise<CartItem>;
+  incrementOne(userId: number, id: number, count: number): Promise<CartItem>;
 }
 
 type ICartItemRepository = CustomRepository & Repository<CartItem>;

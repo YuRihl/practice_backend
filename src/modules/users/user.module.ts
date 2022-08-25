@@ -1,21 +1,22 @@
+import type { Provider } from '@nestjs/common';
 import { Module } from '@nestjs/common';
-import { UserService } from './services/user.service';
 import { UserController } from './controllers/user.controller';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './entities';
-import { CartItem } from '../cart/entities';
-import IUserService from './services/user.service.abstract';
+import { UserRepository, UserRepositoryFactory } from './repositories/user.repository';
+import { UserServiceImpl } from './services/user.service';
+import UserService from './services/user.service.abstract';
+
+const userService: Provider = { provide: UserService, useClass: UserServiceImpl };
+
+const userRepository: Provider = {
+  provide: UserRepository,
+  useFactory: UserRepositoryFactory,
+  inject: ['DATA_SOURCE'],
+};
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, CartItem])],
+  imports: [],
+  exports: [userService],
   controllers: [UserController],
-  providers: [{
-    provide: IUserService,
-    useClass: UserService,
-  }],
-  exports: [{
-    provide: IUserService,
-    useClass: UserService,
-  }],
+  providers: [userService, userRepository],
 })
 export class UserModule { }

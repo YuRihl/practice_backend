@@ -1,16 +1,24 @@
+import type { Provider } from '@nestjs/common';
 import { Module } from '@nestjs/common';
-import { PhotoService } from './services/photo.service';
+import { PhotoServiceImpl } from './services/photo.service';
 import { PhotoController } from './controllers/photo.controller';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Photo } from './entities';
-import IPhotoService from './services/photo.service.abstract';
+import PhotoService from './services/photo.service.abstract';
+import { PhotoRepository, PhotoRepositoryFactory } from './repositories/photo.repository';
+import { UserModule } from '../users/user.module';
+import { ProductModule } from '../products/product.module';
+import { CategoryModule } from '../categories/category.module';
+
+const photoService: Provider = { provide: PhotoService, useClass: PhotoServiceImpl };
+
+const photoRepository: Provider = {
+  provide: PhotoRepository,
+  useFactory: PhotoRepositoryFactory,
+  inject: ['DATA_SOURCE'],
+};
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Photo])],
+  imports: [UserModule, ProductModule, CategoryModule],
   controllers: [PhotoController],
-  providers: [{
-    provide: IPhotoService,
-    useClass: PhotoService,
-  }],
+  providers: [photoService, photoRepository],
 })
 export class PhotoModule { }

@@ -14,7 +14,7 @@ export class Category {
   @PrimaryGeneratedColumn('increment')
   public id!: number;
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ type: 'varchar', length: 50, unique: true })
   public name!: string;
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })

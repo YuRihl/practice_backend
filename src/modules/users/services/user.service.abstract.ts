@@ -1,11 +1,14 @@
+import type { RegisterDto } from 'src/modules/auth/dtos';
+import type { UpdateResponse } from '../../../@types';
 import type { UpdateUserDto } from '../dtos';
 import type { User } from '../entities';
 
-export default abstract class IUserService {
+export default abstract class UserService {
 
-  public abstract findOne(user: User): User;
-  public abstract findAll(): Promise<User[]>;
-  public abstract update(user: User, updateUserDto: UpdateUserDto): Promise<User>;
-  public abstract remove(user: User): Promise<{ message: string }>;
+  public abstract findAllUsers(): Promise<User[]>;
+  public abstract findOneUser(idOrEmail: number | string): Promise<User>;
+  public abstract createOneUser(registerDto: RegisterDto): Promise<User>;
+  public abstract updateOneUser(user: User, updateUserDto: UpdateUserDto): Promise<UpdateResponse>;
+  public abstract deleteOneUser(user: User): Promise<void>;
 
 }

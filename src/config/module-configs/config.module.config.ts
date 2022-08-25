@@ -24,6 +24,12 @@ const configModuleConfig: ConfigModule = {
     PGADMIN_EMAIL: Joi.string().email(),
     PGADMIN_PASSWORD: Joi.string(),
     PGADMIN_PORT: Joi.number().default(5050),
+    JWT_SECRET_KEY: Joi.string().required(),
+    JWT_EXPIRATION_TIME: Joi.string().required(),
+    AWS_REGION: Joi.string().required(),
+    AWS_ACCESS_KEY_ID: Joi.string().required(),
+    AWS_SECRET_ACCESS_KEY: Joi.string().required(),
+    AWS_BUCKET: Joi.string().required(),
   }),
 };
 

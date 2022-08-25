@@ -6,7 +6,6 @@ import { ProductCategoryRepository, ProductRepository } from '../repositories';
 import type { UpdateResponse } from 'src/@types';
 import ProductService from './product.service.abstract';
 import type { CreateProductDto, UpdateProductDto } from '../dtos';
-import type { Category } from '../../categories/entities';
 import type { Product, ProductCategory } from '../entities';
 import { IProductCategoryRepository, IProductRepository } from '../interfaces';
 import CategoryService from '../../categories/services/category.service.abstract';
@@ -45,7 +44,7 @@ export class ProductServiceImpl extends ProductService {
 
   public async findOneProduct(id: number): Promise<Product> {
     try {
-      const product = await this.productRepository.findOneById(id);
+      const product = await this.productRepository.findById(id);
       if (!product) throw new NotFoundException('Product with given ID was not found');
 
       return product;
@@ -58,16 +57,21 @@ export class ProductServiceImpl extends ProductService {
     try {
       const product = await this.productRepository.createOne(createProductDto) as Product;
 
-      if (createProductDto.categories) {
-        createProductDto.categories.forEach(async (categoryName) => {
-          const category = await this.categoryService.createOneCategory({ name: categoryName }) as Category;
-          await this.productCategoryRepository.createOne(product, category) as ProductCategory;
-        });
+      const categoryNames = createProductDto.categories;
+
+      if (categoryNames && categoryNames.length > 0) {
+        const newProductCategories: ProductCategory[] = [];
+
+        for (const name of categoryNames) {
+          const category = await this.categoryService.createOneCategory({ name });
+          newProductCategories.push(await this.productCategoryRepository.createOne(product, category));
+        }
+
+        product.categories = newProductCategories;
+        return await this.productRepository.findById(product.id) as Product;
       }
 
-      const newProduct = await this.productRepository.findOneById(product.id) as Product;
-
-      return newProduct;
+      return product;
     } catch (error) {
       throw error instanceof HttpException ? error : new InternalServerErrorException((error as Error).message);
     }
@@ -75,8 +79,23 @@ export class ProductServiceImpl extends ProductService {
 
   public async updateOneProduct(id: number, updateProductDto: UpdateProductDto): Promise<UpdateResponse> {
     try {
-      const product = await this.productRepository.findOneById({ id });
+      const product = await this.productRepository.findById(id);
       if (!product) throw new NotFoundException('Product to update was not found');
+
+      const categoryNames = updateProductDto.categories;
+
+      if (categoryNames && categoryNames.length > 0) {
+        await this.productCategoryRepository.deleteAll(product.categories);
+
+        const newProductCategories: ProductCategory[] = [];
+
+        for (const name of categoryNames) {
+          const category = await this.categoryService.createOneCategory({ name });
+          newProductCategories.push(await this.productCategoryRepository.createOne(product, category));
+        }
+
+        product.categories = newProductCategories;
+      }
 
       return await this.productRepository.updateOne(product, updateProductDto);
     } catch (error) {

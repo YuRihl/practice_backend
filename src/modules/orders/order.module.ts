@@ -1,16 +1,31 @@
+import type { Provider } from '@nestjs/common';
 import { Module } from '@nestjs/common';
-import { OrderService } from './services/order.service';
+import { OrderServiceImpl } from './services/order.service';
 import { OrderController as OrderController } from './controllers/order.controller';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Order, OrderItem } from './entities';
-import IOrderService from './services/order.service.abstract';
+import OrderService from './services/order.service.abstract';
+import {
+  OrderItemRepository, OrderItemRepositoryFactory,
+  OrderRepository, OrderRepositoryFactory,
+} from './repositories';
+import { ProductModule } from '../products/product.module';
+
+const orderService: Provider = { provide: OrderService, useClass: OrderServiceImpl };
+
+const orderRepository: Provider = {
+  provide: OrderRepository,
+  useFactory: OrderRepositoryFactory,
+  inject: ['DATA_SOURCE'],
+};
+
+const orderItemRepository: Provider = {
+  provide: OrderItemRepository,
+  useFactory: OrderItemRepositoryFactory,
+  inject: ['DATA_SOURCE'],
+};
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order, OrderItem])],
+  imports: [ProductModule],
   controllers: [OrderController],
-  providers: [{
-    provide: IOrderService,
-    useClass: OrderService,
-  }],
+  providers: [orderService, orderRepository, orderItemRepository],
 })
 export class OrderModule { }

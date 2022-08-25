@@ -17,11 +17,11 @@ export class CartItem {
   @Column({ type: 'int', name: 'item_count', default: 0 })
   public itemCount!: number;
 
-  @ManyToOne(() => User, (user) => user.cartItems)
+  @ManyToOne(() => User, (user) => user.cartItems, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   public user!: User;
 
-  @ManyToOne(() => Product, (product) => product.cartItems)
+  @ManyToOne(() => Product, (product) => product.cartItems, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'product_id' })
   public product!: Product;
 

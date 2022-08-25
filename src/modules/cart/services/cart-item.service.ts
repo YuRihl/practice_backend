@@ -23,9 +23,9 @@ export class CartItemServiceImpl implements CartItemService {
     }
   }
 
-  public async findOneCartItem(id: number): Promise<CartItem> {
+  public async findOneCartItem(user: User, id: number): Promise<CartItem> {
     try {
-      const cartItem = await this.cartItemRepository.findOneById(id);
+      const cartItem = await this.cartItemRepository.findById(user.id, id);
       if (!cartItem) throw new NotFoundException('Cart item with given ID was not found');
 
       return cartItem;
@@ -40,7 +40,8 @@ export class CartItemServiceImpl implements CartItemService {
 
       const createResult = await this.cartItemRepository.createOne(user, product);
 
-      const cartItem = await this.cartItemRepository.incrementOne(createResult.id, createCartItemDto.itemCount);
+      const cartItem =
+        await this.cartItemRepository.incrementOne(user.id, createResult.id, createCartItemDto.itemCount);
 
       return await this.checkItemCount(cartItem);
 
@@ -50,9 +51,9 @@ export class CartItemServiceImpl implements CartItemService {
 
   }
 
-  public async deleteOneCartItem(id: number): Promise<void> {
+  public async deleteOneCartItem(user: User, id: number): Promise<void> {
     try {
-      const cartItem = await this.cartItemRepository.findOneById(id);
+      const cartItem = await this.cartItemRepository.findById(user.id, id);
       if (!cartItem) throw new NotFoundException('Cart item to delete was not found');
 
       await this.cartItemRepository.remove(cartItem);

@@ -1,13 +1,17 @@
-import { PartialType } from '@nestjs/swagger';
-import { IsOptional } from 'class-validator';
+import { OmitType, PartialType } from '@nestjs/swagger';
+import { IsNotEmpty, IsOptional, IsPositive, IsString, MaxLength } from 'class-validator';
 import { CreateProductDto } from './create-product.dto';
 
-export class UpdateProductDto extends PartialType(CreateProductDto) {
+export class UpdateProductDto extends PartialType(OmitType(CreateProductDto, ['name', 'price'])) {
 
   @IsOptional()
-  declare public name?: string;
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(50)
+  public name?: string;
 
   @IsOptional()
-  declare public price?: number;
+  @IsPositive()
+  public price?: number;
 
 }
