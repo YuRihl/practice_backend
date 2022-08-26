@@ -5,10 +5,10 @@ import type { Order, OrderStatus } from '../entities';
 
 export default abstract class OrderService {
 
-  public abstract findAllOrders(user: User, status: OrderStatus): Promise<Order[]>;
-  public abstract findOneOrder(user: User, id: number): Promise<Order>;
+  public abstract findAllOrders(userId: number, status: OrderStatus): Promise<Order[]>;
+  public abstract findOneOrder(id: number, userId: number): Promise<Order>;
   public abstract createOneOrder(user: User, createOrderDtos: CreateOrderDto[]): Promise<Order>;
-  public abstract updateOneOrder(user: User, id: number, updateOrderDto: UpdateOrderDto): Promise<UpdateResponse>;
-  public abstract deleteOneOrder(user: User, id: number): Promise<void>;
+  public abstract updateOneOrder(id: number, userId: number, updateOrderDto: UpdateOrderDto): Promise<UpdateResponse>;
+  public abstract deleteOneOrder(id: number, userId: number): Promise<void>;
 
 }

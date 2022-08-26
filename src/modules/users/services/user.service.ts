@@ -1,12 +1,12 @@
-import { HttpException, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import type { UpdateResponse } from '../../../@types';
+import type { RegisterDto } from '../../auth/dtos';
 import type { UpdateUserDto } from '../dtos/update-user.dto';
 import type { User } from '../entities';
-import { UserRepository } from '../repositories/user.repository';
 import { IUserRepository } from '../interfaces';
-import type { UpdateResponse } from '../../../@types';
+import { UserRepository } from '../repositories/user.repository';
 import UserService from './user.service.abstract';
-import type { RegisterDto } from 'src/modules/auth/dtos';
 
 @Injectable()
 export class UserServiceImpl extends UserService {
@@ -18,51 +18,30 @@ export class UserServiceImpl extends UserService {
   }
 
   public async findAllUsers(): Promise<User[]> {
-    try {
-      return await this.userRepository.findAll();
-    } catch (error) {
-      throw error instanceof HttpException ? error : new InternalServerErrorException((error as Error).message);
-    }
+    return await this.userRepository.find();
   }
 
   public async findOneUser(idOrEmail: number | string): Promise<User> {
-    try {
-      const user = await this.userRepository.findOneBy(idOrEmail);
+    const user =
+      await this.userRepository.findOneById(typeof idOrEmail === 'number' ? { id: idOrEmail } : { email: idOrEmail });
+    if (!user) throw new NotFoundException(`User with ${idOrEmail} not found`);
 
-      if (!user)
-        throw new NotFoundException(`User with given ${typeof idOrEmail === 'number' ? 'ID' : 'email'} was not found`);
-
-      return user;
-    } catch (error) {
-      throw error instanceof HttpException ? error : new InternalServerErrorException((error as Error).message);
-    }
+    return user;
   }
 
   public async createOneUser(registerDto: RegisterDto): Promise<User> {
-    try {
-      const hashSalt = await bcrypt.genSalt();
+    const hashSalt = await bcrypt.genSalt();
 
-      return await this.userRepository
-        .createOne({ ...registerDto, password: await bcrypt.hash(registerDto.password, hashSalt) });
-    } catch (error) {
-      throw error instanceof HttpException ? error : new InternalServerErrorException((error as Error).message);
-    }
+    return await this.userRepository
+      .createOne({ ...registerDto, password: await bcrypt.hash(registerDto.password, hashSalt) });
   }
 
   public async updateOneUser(user: User, updateUserDto: UpdateUserDto): Promise<UpdateResponse> {
-    try {
-      return await this.userRepository.updateOne(user, updateUserDto);
-    } catch (error) {
-      throw error instanceof HttpException ? error : new InternalServerErrorException((error as Error).message);
-    }
+    return await this.userRepository.updateOne(user, updateUserDto);
   }
 
   public async deleteOneUser(user: User): Promise<void> {
-    try {
-      await this.userRepository.deleteOne(user);
-    } catch (error) {
-      throw error instanceof HttpException ? error : new InternalServerErrorException((error as Error).message);
-    }
+    await this.userRepository.remove(user);
   }
 
 }

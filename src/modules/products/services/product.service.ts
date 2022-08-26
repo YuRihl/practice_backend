@@ -1,17 +1,36 @@
 import {
-  BadRequestException, HttpException, Inject, Injectable,
-  InternalServerErrorException, NotFoundException,
+  BadRequestException, Inject, Injectable,
+  NotFoundException,
 } from '@nestjs/common';
-import { ProductCategoryRepository, ProductRepository } from '../repositories';
-import type { UpdateResponse } from 'src/@types';
-import ProductService from './product.service.abstract';
+import type { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
+import { In } from 'typeorm';
+import { Like } from 'typeorm';
+import type { UpdateResponse } from '../../../@types';
+import CategoryService from '../../categories/services/category.service.abstract';
 import type { CreateProductDto, UpdateProductDto } from '../dtos';
 import type { Product, ProductCategory } from '../entities';
 import { IProductCategoryRepository, IProductRepository } from '../interfaces';
-import CategoryService from '../../categories/services/category.service.abstract';
+import { ProductCategoryRepository, ProductRepository } from '../repositories';
+import ProductService from './product.service.abstract';
 
 @Injectable()
 export class ProductServiceImpl extends ProductService {
+
+  private _selectOptions: FindOptionsSelect<Product> = {
+    id: true,
+    name: true,
+    price: true,
+    availableCount: true,
+    soldCount: true,
+    description: true,
+    content: true,
+  };
+
+  private _relationOptions: FindOptionsRelations<Product> = {
+    categories: {
+      category: true,
+    },
+  };
 
   constructor(
     @Inject(ProductRepository) private readonly productRepository: IProductRepository,
@@ -27,91 +46,88 @@ export class ProductServiceImpl extends ProductService {
     page: number,
     perPage: number,
   ): Promise<Product[]> {
-    try {
-      if (page <= 0 || perPage < 0)
-        throw new BadRequestException('Pagination values are negative, but they have to be positive');
+    if (page <= 0 || perPage < 0)
+      throw new BadRequestException('Pagination values are negative, but they have to be positive');
 
-      const skip = (page - 1) * perPage;
-      const take = perPage;
+    const skip = (page - 1) * perPage;
+    const take = perPage;
 
-      const products = await this.productRepository.findAllBy({ categories, name, skip, take });
-
-      return products;
-    } catch (error) {
-      throw error instanceof HttpException ? error : new InternalServerErrorException((error as Error).message);
-    }
+    return await this.productRepository.find({
+      select: this._selectOptions,
+      relations: this._relationOptions,
+      where: {
+        name: Like(`${name}%`),
+        categories: {
+          category: {
+            name: categories.includes('All Category') ? undefined : In(categories),
+          },
+        },
+      },
+      order: {
+        id: 'asc',
+      },
+      skip,
+      take,
+    });
   }
 
   public async findOneProduct(id: number): Promise<Product> {
-    try {
-      const product = await this.productRepository.findById(id);
-      if (!product) throw new NotFoundException('Product with given ID was not found');
 
-      return product;
-    } catch (error) {
-      throw error instanceof HttpException ? error : new InternalServerErrorException((error as Error).message);
-    }
+    const product = await this.productRepository.findOne({
+      select: this._selectOptions,
+      relations: this._relationOptions,
+      where: { id },
+    });
+    if (!product) throw new NotFoundException(`Product with ID ${id} not found`);
+
+    return product;
   }
 
   public async createOneProduct(createProductDto: CreateProductDto): Promise<Product> {
-    try {
-      const product = await this.productRepository.createOne(createProductDto) as Product;
+    const product = await this.productRepository.createOne(createProductDto);
 
-      const categoryNames = createProductDto.categories;
+    const categoryNames = createProductDto.categories;
 
-      if (categoryNames && categoryNames.length > 0) {
-        const newProductCategories: ProductCategory[] = [];
+    if (categoryNames && categoryNames.length > 0) {
+      const newProductCategories: ProductCategory[] = [];
 
-        for (const name of categoryNames) {
-          const category = await this.categoryService.createOneCategory({ name });
-          newProductCategories.push(await this.productCategoryRepository.createOne(product, category));
-        }
-
-        product.categories = newProductCategories;
-        return await this.productRepository.findById(product.id) as Product;
+      for (const name of categoryNames) {
+        const category = await this.categoryService.createOneCategory({ name });
+        newProductCategories.push(await this.productCategoryRepository.createOne(product, category));
       }
 
-      return product;
-    } catch (error) {
-      throw error instanceof HttpException ? error : new InternalServerErrorException((error as Error).message);
+      product.categories = newProductCategories;
+      return await this.findOneProduct(product.id);
     }
+
+    return product;
   }
 
   public async updateOneProduct(id: number, updateProductDto: UpdateProductDto): Promise<UpdateResponse> {
-    try {
-      const product = await this.productRepository.findById(id);
-      if (!product) throw new NotFoundException('Product to update was not found');
+    const product = await this.findOneProduct(id);
 
-      const categoryNames = updateProductDto.categories;
+    const categoryNames = updateProductDto.categories;
 
-      if (categoryNames && categoryNames.length > 0) {
-        await this.productCategoryRepository.deleteAll(product.categories);
+    if (categoryNames && categoryNames.length > 0) {
+      await this.productCategoryRepository.remove(product.categories);
 
-        const newProductCategories: ProductCategory[] = [];
+      const newProductCategories: ProductCategory[] = [];
 
-        for (const name of categoryNames) {
-          const category = await this.categoryService.createOneCategory({ name });
-          newProductCategories.push(await this.productCategoryRepository.createOne(product, category));
-        }
-
-        product.categories = newProductCategories;
+      for (const name of categoryNames) {
+        const category = await this.categoryService.createOneCategory({ name });
+        newProductCategories.push(await this.productCategoryRepository.createOne(product, category));
       }
 
-      return await this.productRepository.updateOne(product, updateProductDto);
-    } catch (error) {
-      throw error instanceof HttpException ? error : new InternalServerErrorException((error as Error).message);
+      product.categories = newProductCategories;
     }
+
+    return await this.productRepository.updateOne(product, updateProductDto);
   }
 
   public async deleteOneProduct(id: number): Promise<void> {
-    try {
-      const product = await this.productRepository.findOneById({ id });
-      if (!product) throw new NotFoundException('Product to delete was not found');
+    const product = await this.findOneProduct(id);
 
-      await this.productRepository.deleteOne(product);
-    } catch (error) {
-      throw error instanceof HttpException ? error : new InternalServerErrorException((error as Error).message);
-    }
+    await this.productRepository.remove(product);
   }
 
 }

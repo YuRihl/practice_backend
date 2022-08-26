@@ -3,6 +3,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  Length,
   MaxLength,
 } from 'class-validator';
 export class UpdateUserDto {
@@ -15,19 +16,19 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   @IsNotEmpty()
-  @MaxLength(100)
+  @Length(6, 50)
   public password?: string;
 
   @IsOptional()
   @IsString()
   @IsNotEmpty()
-  @MaxLength(50)
+  @Length(2, 50)
   public firstName?: string;
 
   @IsOptional()
   @IsString()
   @IsNotEmpty()
-  @MaxLength(50)
+  @Length(2, 50)
   public secondName?: string;
 
 }

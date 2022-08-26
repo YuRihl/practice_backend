@@ -1,4 +1,4 @@
-import type { RegisterDto } from 'src/modules/auth/dtos';
+import type { RegisterDto } from '../../auth/dtos';
 import type { UpdateResponse } from '../../../@types';
 import type { UpdateUserDto } from '../dtos';
 import type { User } from '../entities';

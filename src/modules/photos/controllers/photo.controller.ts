@@ -9,26 +9,26 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiConsumes, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { User } from '../../users/entities';
 import { UserDecorator } from '../../../@framework/decorators';
 import { JwtGuard } from '../../../@framework/guards';
 import type { Photo } from '../entities';
 import PhotoService from '../services/photo.service.abstract';
 
+@ApiTags('Photo')
 @Controller('photos')
 export class PhotoController {
 
   constructor(private readonly photoService: PhotoService) { }
 
-  @ApiOkResponse()
   @Get(':id')
   public findOnePhoto(@Param('id', ParseIntPipe) id: number): Promise<Photo> {
     return this.photoService.findOnePhoto(id);
   }
 
-  @ApiCreatedResponse()
   @ApiConsumes('multipart/form-data')
+  @ApiBody({ description: 'User photo' })
   @UseGuards(JwtGuard)
   @Post()
   @UseInterceptors(FileInterceptor('photo'))

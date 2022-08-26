@@ -1,43 +1,33 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Delete,
-  UseGuards,
-  ParseIntPipe,
-  HttpCode,
-  HttpStatus,
+  Body, Controller, Delete, Get, HttpCode,
+  HttpStatus, Param, ParseIntPipe, Post, UseGuards,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { UserDecorator } from '../../../@framework/decorators';
 import { JwtGuard } from '../../../@framework/guards';
-import { CreateCartItemDto } from '../dtos/create-cart-item.dto';
 import { User } from '../../users/entities';
+import { CreateCartItemDto } from '../dtos/create-cart-item.dto';
 import type { CartItem } from '../entities';
 import CartItemService from '../services/cart-item.service.abstract';
-import { ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse } from '@nestjs/swagger';
 
+@ApiTags('User cart')
 @Controller('user/cart')
 export class CartItemController {
 
   constructor(private readonly cartItemService: CartItemService) { }
 
-  @ApiOkResponse()
   @UseGuards(JwtGuard)
   @Get()
   public findAllCartItems(@UserDecorator() user: User): Promise<CartItem[]> {
-    return this.cartItemService.findAllCartItems(user);
+    return this.cartItemService.findAllCartItems(user.id);
   }
 
-  @ApiOkResponse()
   @UseGuards(JwtGuard)
   @Get(':id')
   public findOneCartItem(@UserDecorator() user: User, @Param('id', ParseIntPipe) id: number): Promise<CartItem> {
-    return this.cartItemService.findOneCartItem(user, id);
+    return this.cartItemService.findOneCartItem(id, user.id);
   }
 
-  @ApiCreatedResponse()
   @UseGuards(JwtGuard)
   @Post()
   public createOneCartItem(
@@ -47,12 +37,11 @@ export class CartItemController {
     return this.cartItemService.createOneCartItem(user, createCartItemDto);
   }
 
-  @ApiNoContentResponse()
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtGuard)
   @Delete(':id')
-  public deleteOneCartItem(@UserDecorator() user: User, @Param('id', ParseIntPipe) id: number): void {
-    this.cartItemService.deleteOneCartItem(user, id);
+  public deleteOneCartItem(@UserDecorator() user: User, @Param('id', ParseIntPipe) id: number): Promise<void> {
+    return this.cartItemService.deleteOneCartItem(id, user.id);
   }
 
 }

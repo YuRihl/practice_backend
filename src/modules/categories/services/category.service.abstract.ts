@@ -1,4 +1,4 @@
-import type { UpdateResponse } from 'src/@types';
+import type { UpdateResponse } from '../../../@types';
 import type { CreateCategoryDto, UpdateCategoryDto } from '../dtos';
 import type { Category } from '../entities';
 

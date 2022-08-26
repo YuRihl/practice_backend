@@ -8,7 +8,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User {
@@ -22,7 +21,6 @@ export class User {
   @Column({ type: 'boolean', default: false, name: 'is_verified' })
   public isVerified!: boolean;
 
-  @Exclude()
   @Column({ type: 'varchar', length: 100 })
   public password!: string;
 

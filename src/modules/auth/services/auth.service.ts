@@ -1,16 +1,14 @@
 import {
-  HttpException,
   Inject,
   Injectable,
-  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import UserService from '../../users/services/user.service.abstract';
+import type { LoginDto, RegisterDto, AuthResponseDto } from '../dtos';
 import AuthService from './auth.service.abstract';
-import type { LoginDto, RegisterDto } from '../dtos';
-import UserService from 'src/modules/users/services/user.service.abstract';
 
 @Injectable()
 export default class AuthServiceImpl extends AuthService {
@@ -21,42 +19,31 @@ export default class AuthServiceImpl extends AuthService {
     @Inject(UserService) private readonly userService: UserService,
   ) { super(); }
 
-  public async login(userDto: LoginDto): Promise<{ access_token: string }> {
-    try {
-      const user = await this.userService.findOneUser(userDto.email);
+  public async login(userDto: LoginDto): Promise<AuthResponseDto> {
+    const user = await this.userService.findOneUser(userDto.email);
 
-      const passwordCheck = await bcrypt.compare(userDto.password, user.password);
-      if (!passwordCheck) throw new UnauthorizedException('Incorrect password');
+    const passwordCheck = await bcrypt.compare(userDto.password, user.password);
+    if (!passwordCheck) throw new UnauthorizedException('Incorrect password');
 
-      return this.signToken(user.id, user.email);
-    } catch (error) {
-      throw error instanceof HttpException ? error : new InternalServerErrorException((error as Error).message);
-    }
+    return this.signToken(user.id, user.email);
   }
 
-  public async register(userDto: RegisterDto): Promise<{ access_token: string }> {
-    try {
-      const user = await this.userService.createOneUser(userDto);
+  public async register(userDto: RegisterDto): Promise<AuthResponseDto> {
+    const user = await this.userService.createOneUser(userDto);
 
-      return this.signToken(user.id, user.email);
-    } catch (error) {
-      throw new InternalServerErrorException((error as Error).message);
-    }
+    return this.signToken(user.id, user.email);
   }
 
-  public async signToken(id: number, email: string): Promise<{ access_token: string }> {
-    try {
-      const payload = { sub: id, email };
+  public async signToken(id: number, email: string): Promise<AuthResponseDto> {
+    const payload = { sub: id, email };
 
-      return {
-        access_token: await this.jwtService.signAsync(payload, {
-          expiresIn: this.configService.get<string>('JWT_EXPIRATION_TIME'),
-          secret: this.configService.get<string>('JWT_SECRET_KEY'),
-        }),
-      };
-    } catch (error) {
-      throw new InternalServerErrorException((error as Error).message);
-    }
+    return {
+      access_token: await this.jwtService.signAsync(payload, {
+        expiresIn: this.configService.get<string>('JWT_EXPIRATION_TIME'),
+        secret: this.configService.get<string>('JWT_SECRET_KEY'),
+      }),
+    };
+
   }
 
 }
