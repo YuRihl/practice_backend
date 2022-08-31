@@ -1,5 +1,4 @@
 import type { DataSource, ObjectLiteral } from 'typeorm';
-import type { UpdateResponse } from '../../../@types';
 import type { CreateCategoryDto, UpdateCategoryDto } from '../dtos';
 import { Category } from '../entities';
 import type { ICategoryRepository } from '../interfaces';

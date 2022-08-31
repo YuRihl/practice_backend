@@ -1,9 +1,9 @@
 import type { Repository } from 'typeorm';
+import type { CreateOrderItemDto } from '../dtos';
 import type { OrderItem } from '../entities';
-import type { CreateOrderItem } from './create-order-item';
 
 interface CustomRepository {
-  createOne(createOrderItem: CreateOrderItem): Promise<OrderItem>;
+  createOne(createOrderItemDto: CreateOrderItemDto): Promise<OrderItem>;
 }
 
 type IOrderItemRepository = CustomRepository & Repository<OrderItem>

@@ -1,5 +1,4 @@
 import type { Repository } from 'typeorm';
-import type { UpdateResponse } from '../../../@types';
 import type { CreateProductDto, UpdateProductDto } from '../dtos';
 import type { Product } from '../entities';
 

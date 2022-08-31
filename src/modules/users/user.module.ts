@@ -1,9 +1,8 @@
 import type { Provider } from '@nestjs/common';
 import { Module } from '@nestjs/common';
-import { UserController } from './controllers/user.controller';
-import { UserRepository, UserRepositoryFactory } from './repositories/user.repository';
-import { UserServiceImpl } from './services/user.service';
-import UserService from './services/user.service.abstract';
+import { UserController } from './controllers';
+import { UserRepository, UserRepositoryFactory } from './repositories';
+import { UserService, UserServiceImpl } from './services';
 
 const userService: Provider = { provide: UserService, useClass: UserServiceImpl };
 

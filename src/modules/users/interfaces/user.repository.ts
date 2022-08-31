@@ -1,5 +1,4 @@
 import type { Repository } from 'typeorm';
-import type { UpdateResponse } from '../../../@types';
 import type { RegisterDto } from '../../../modules/auth/dtos';
 import type { UpdateUserDto } from '../dtos';
 import type { User } from '../entities';

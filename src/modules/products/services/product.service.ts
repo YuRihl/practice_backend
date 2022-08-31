@@ -2,29 +2,17 @@ import {
   BadRequestException, Inject, Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
-import { In } from 'typeorm';
-import { Like } from 'typeorm';
-import type { UpdateResponse } from '../../../@types';
-import CategoryService from '../../categories/services/category.service.abstract';
+import type { FindOptionsRelations } from 'typeorm';
+import { In, Like } from 'typeorm';
+import { CategoryService } from '../../categories/services';
 import type { CreateProductDto, UpdateProductDto } from '../dtos';
 import type { Product, ProductCategory } from '../entities';
 import { IProductCategoryRepository, IProductRepository } from '../interfaces';
 import { ProductCategoryRepository, ProductRepository } from '../repositories';
-import ProductService from './product.service.abstract';
+import { ProductService } from './product.service.abstract';
 
 @Injectable()
 export class ProductServiceImpl extends ProductService {
-
-  private _selectOptions: FindOptionsSelect<Product> = {
-    id: true,
-    name: true,
-    price: true,
-    availableCount: true,
-    soldCount: true,
-    description: true,
-    content: true,
-  };
 
   private _relationOptions: FindOptionsRelations<Product> = {
     categories: {
@@ -53,7 +41,6 @@ export class ProductServiceImpl extends ProductService {
     const take = perPage;
 
     return await this.productRepository.find({
-      select: this._selectOptions,
       relations: this._relationOptions,
       where: {
         name: Like(`${name}%`),
@@ -74,7 +61,6 @@ export class ProductServiceImpl extends ProductService {
   public async findOneProduct(id: number): Promise<Product> {
 
     const product = await this.productRepository.findOne({
-      select: this._selectOptions,
       relations: this._relationOptions,
       where: { id },
     });

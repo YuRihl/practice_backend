@@ -1,5 +1,4 @@
 import type { DataSource } from 'typeorm';
-import type { UpdateResponse } from '../../../@types';
 import type { User } from '../../users/entities';
 import type { UpdateOrderDto } from '../dtos';
 import { Order } from '../entities';

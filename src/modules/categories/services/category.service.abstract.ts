@@ -1,8 +1,7 @@
-import type { UpdateResponse } from '../../../@types';
 import type { CreateCategoryDto, UpdateCategoryDto } from '../dtos';
 import type { Category } from '../entities';
 
-export default abstract class CategoryService {
+export abstract class CategoryService {
 
   public abstract findAllCategories(): Promise<Category[]>;
   public abstract findOneCategory(id: number): Promise<Category>;

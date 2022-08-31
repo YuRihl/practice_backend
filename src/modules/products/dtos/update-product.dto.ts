@@ -1,6 +1,6 @@
 import { OmitType, PartialType } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsPositive, IsString, MaxLength } from 'class-validator';
-import { CreateProductDto } from './create-product.dto';
+import { CreateProductDto } from '.';
 
 export class UpdateProductDto extends PartialType(OmitType(CreateProductDto, ['name', 'price'])) {
 

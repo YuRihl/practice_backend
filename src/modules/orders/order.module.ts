@@ -1,13 +1,12 @@
 import type { Provider } from '@nestjs/common';
 import { Module } from '@nestjs/common';
-import { OrderServiceImpl } from './services/order.service';
-import { OrderController as OrderController } from './controllers/order.controller';
-import OrderService from './services/order.service.abstract';
+import { ProductModule } from '../products/product.module';
+import { OrderController } from './controllers';
 import {
   OrderItemRepository, OrderItemRepositoryFactory,
   OrderRepository, OrderRepositoryFactory,
 } from './repositories';
-import { ProductModule } from '../products/product.module';
+import { OrderService, OrderServiceImpl } from './services';
 
 const orderService: Provider = { provide: OrderService, useClass: OrderServiceImpl };
 

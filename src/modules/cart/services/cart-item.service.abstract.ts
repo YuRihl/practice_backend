@@ -2,7 +2,7 @@ import type { CreateCartItemDto } from '../dtos';
 import type { User } from '../../users/entities';
 import type { CartItem } from '../entities';
 
-export default abstract class CartItemService {
+export abstract class CartItemService {
 
   public abstract findAllCartItems(userId: number): Promise<CartItem[]>;
   public abstract findOneCartItem(id: number, userId: number): Promise<CartItem>;

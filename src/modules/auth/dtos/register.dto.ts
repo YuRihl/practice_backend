@@ -1,5 +1,6 @@
-import { IsNotEmpty, IsString, Length } from 'class-validator';
-import { LoginDto } from './login.dto';
+import { IsEnum, IsNotEmpty, IsString, Length } from 'class-validator';
+import { Role } from '../../../@framework/decorators';
+import { LoginDto } from '.';
 
 export class RegisterDto extends LoginDto {
 
@@ -12,5 +13,8 @@ export class RegisterDto extends LoginDto {
   @IsNotEmpty()
   @Length(2, 50)
   public secondName!: string;
+
+  @IsEnum(Role)
+  public role!: Role;
 
 }

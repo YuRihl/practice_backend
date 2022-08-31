@@ -34,6 +34,7 @@ async function bootstrap(): Promise<void> {
     .setTitle('Marketplace API')
     .setDescription('The marketplace API description for documentation of API')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   const swaggerDocument = SwaggerModule.createDocument(app, documentConfig);

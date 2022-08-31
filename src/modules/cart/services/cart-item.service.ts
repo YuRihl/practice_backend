@@ -1,19 +1,17 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import ProductService from '../../products/services/product.service.abstract';
 import type { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
+import { CartItemService } from './cart-item.service.abstract';
+import { ProductService } from '../../products/services';
 import type { User } from '../../users/entities';
 import type { CreateCartItemDto } from '../dtos';
 import type { CartItem } from '../entities';
 import { ICartItemRepository } from '../interfaces';
-import { CartItemRepository } from '../repositories/cart-item.repository';
-import type CartItemService from './cart-item.service.abstract';
+import { CartItemRepository } from '../repositories';
 
 @Injectable()
-export class CartItemServiceImpl implements CartItemService {
+export class CartItemServiceImpl extends CartItemService {
 
   private _selectOptions: FindOptionsSelect<CartItem> = {
-    id: true,
-    itemCount: true,
     product: {
       id: true,
       name: true,
@@ -28,7 +26,7 @@ export class CartItemServiceImpl implements CartItemService {
   constructor(
     @Inject(CartItemRepository) private readonly cartItemRepository: ICartItemRepository,
     @Inject(ProductService) private readonly productService: ProductService,
-  ) { }
+  ) { super(); }
 
   public async findAllCartItems(userId: number): Promise<CartItem[]> {
     return await this.cartItemRepository.find({

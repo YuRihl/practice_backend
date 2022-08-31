@@ -1,5 +1,3 @@
-import { CartItem } from '../../cart/entities';
-import { Order } from '../../orders/entities';
 import {
   Column,
   CreateDateColumn,
@@ -8,6 +6,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Role } from '../../../@framework/decorators';
+import { CartItem } from '../../cart/entities';
+import { Order } from '../../orders/entities';
 
 @Entity()
 export class User {
@@ -29,6 +30,9 @@ export class User {
 
   @Column({ type: 'varchar', length: 50, name: 'second_name' })
   public secondName!: string;
+
+  @Column({ type: 'enum', enum: Role, default: Role.User })
+  public role!: Role;
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   public createdAt!: Date;

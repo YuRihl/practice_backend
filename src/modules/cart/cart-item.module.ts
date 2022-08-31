@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
-import { CartItemController } from './controllers/cart-item.controller';
-import { CartItemServiceImpl } from './services/cart-item.service';
-import CartItemService from './services/cart-item.service.abstract';
-import { CartItemRepository, CartItemRepositoryFactory } from './repositories/cart-item.repository';
 import { ProductModule } from '../products/product.module';
+import { CartItemController } from './controllers';
+import { CartItemRepository, CartItemRepositoryFactory } from './repositories';
+import { CartItemService, CartItemServiceImpl } from './services';
 
 const cartItemService = { provide: CartItemService, useClass: CartItemServiceImpl };
 

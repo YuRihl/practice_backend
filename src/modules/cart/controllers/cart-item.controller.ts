@@ -6,9 +6,8 @@ import { ApiTags } from '@nestjs/swagger';
 import { UserDecorator } from '../../../@framework/decorators';
 import { JwtGuard } from '../../../@framework/guards';
 import { User } from '../../users/entities';
-import { CreateCartItemDto } from '../dtos/create-cart-item.dto';
-import type { CartItem } from '../entities';
-import CartItemService from '../services/cart-item.service.abstract';
+import { CartItemDto, CreateCartItemDto } from '../dtos';
+import { CartItemService } from '../services';
 
 @ApiTags('User cart')
 @Controller('user/cart')
@@ -18,23 +17,25 @@ export class CartItemController {
 
   @UseGuards(JwtGuard)
   @Get()
-  public findAllCartItems(@UserDecorator() user: User): Promise<CartItem[]> {
-    return this.cartItemService.findAllCartItems(user.id);
+  public async findAllCartItems(@UserDecorator() user: User): Promise<CartItemDto[]> {
+    return CartItemDto.fromEntities(await this.cartItemService.findAllCartItems(user.id));
   }
 
   @UseGuards(JwtGuard)
   @Get(':id')
-  public findOneCartItem(@UserDecorator() user: User, @Param('id', ParseIntPipe) id: number): Promise<CartItem> {
-    return this.cartItemService.findOneCartItem(id, user.id);
+  public async findOneCartItem(@UserDecorator() user: User, @Param('id', ParseIntPipe) id: number)
+    : Promise<CartItemDto> {
+    return CartItemDto.fromEntity(await this.cartItemService.findOneCartItem(id, user.id));
   }
 
   @UseGuards(JwtGuard)
   @Post()
-  public createOneCartItem(
+  public async createOneCartItem(
     @UserDecorator() user: User,
     @Body() createCartItemDto: CreateCartItemDto,
-  ): Promise<CartItem | void> {
-    return this.cartItemService.createOneCartItem(user, createCartItemDto);
+  ): Promise<CartItemDto | void> {
+    const result = await this.cartItemService.createOneCartItem(user, createCartItemDto);
+    if (result) return CartItemDto.fromEntity(result);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)

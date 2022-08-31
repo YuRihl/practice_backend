@@ -1,11 +1,10 @@
 import type { Provider } from '@nestjs/common';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthController } from './controllers/auth.controller';
-import AuthServiceImpl from './services/auth.service';
-import { JwtStrategy } from './strategy';
-import AuthService from './services/auth.service.abstract';
 import { UserModule } from '../users/user.module';
+import { AuthController } from './controllers';
+import { AuthService, AuthServiceImpl } from './services';
+import { JwtStrategy } from './strategy';
 
 const authService: Provider = { provide: AuthService, useClass: AuthServiceImpl };
 

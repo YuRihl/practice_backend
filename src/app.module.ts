@@ -1,18 +1,13 @@
 import type { Provider } from '@nestjs/common';
-import { Global } from '@nestjs/common';
-import { Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { ConfigModule } from '@nestjs/config';
+import { Global, Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ProductModule } from './modules/products/product.module';
-import { UserModule } from './modules/users/user.module';
-import { AuthModule } from './modules/auth/auth.module';
-import { CartItemModule } from './modules/cart/cart-item.module';
-import { PhotoModule } from './modules/photos/photo.module';
-import { CategoryModule } from './modules/categories/category.module';
-import { OrderModule } from './modules/orders/order.module';
-import { configModuleConfig } from './config/module-configs/config.module.config';
 import { DataSource } from 'typeorm';
+import { configModuleConfig } from './config/module-configs/config.module.config';
+import {
+  AuthModule, CartItemModule, CategoryModule,
+  OrderModule, PhotoModule, ProductModule, UserModule,
+} from './modules';
 
 const dataSourceService: Provider = {
   provide: 'DATA_SOURCE',

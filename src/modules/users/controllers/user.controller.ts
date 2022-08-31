@@ -4,12 +4,11 @@ import {
   HttpStatus, Patch, UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { UserDecorator } from '../../../@framework/decorators';
-import { JwtGuard } from '../../../@framework/guards';
-import type { UpdateResponse } from '../../../@types';
-import { UpdateUserDto } from '../dtos';
+import { Role, Roles, UserDecorator } from '../../../@framework/decorators';
+import { JwtGuard, RolesGuard } from '../../../@framework/guards';
+import { UpdateUserDto, UserDto } from '../dtos';
 import { User } from '../entities';
-import UserService from '../services/user.service.abstract';
+import { UserService } from '../services';
 
 @ApiTags('User')
 @Controller('user')
@@ -19,14 +18,15 @@ export class UserController {
 
   @UseGuards(JwtGuard)
   @Get('profile')
-  public findOne(@UserDecorator() user: User): Promise<User> {
-    return this.userService.findOneUser(user.id);
+  public async findOne(@UserDecorator() user: User): Promise<UserDto> {
+    return UserDto.fromEntity(await this.userService.findOneUser(user.id));
   }
 
-  // FOR ADMIN
+  @Roles(Role.Admin)
+  @UseGuards(JwtGuard, RolesGuard)
   @Get('profiles')
-  public findAll(): Promise<User[]> {
-    return this.userService.findAllUsers();
+  public async findAll(): Promise<UserDto[]> {
+    return UserDto.fromEntities(await this.userService.findAllUsers());
   }
 
   @UseGuards(JwtGuard)

@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
-import { CategoryController } from './controllers/category.controller';
-import { CategoryServiceImpl } from './services/category.service';
-import CategoryService from './services/category.service.abstract';
-import { CategoryRepository, CategoryRepositoryFactory } from './repositories/category.repository';
+import { CategoryController } from './controllers';
+import { CategoryRepository, CategoryRepositoryFactory } from './repositories';
+import { CategoryService, CategoryServiceImpl } from './services';
 
 const categoryService = { provide: CategoryService, useClass: CategoryServiceImpl };
 

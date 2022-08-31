@@ -1,6 +1,5 @@
 import * as bcrypt from 'bcrypt';
 import type { DataSource } from 'typeorm';
-import type { UpdateResponse } from '../../../@types';
 import type { RegisterDto } from '../../auth/dtos';
 import type { UpdateUserDto } from '../dtos';
 import { User } from '../entities';

@@ -1,12 +1,12 @@
 import type { Provider } from '@nestjs/common';
 import { Module } from '@nestjs/common';
-import { ProductController } from './controllers/product.controller';
-import ProductService from './services/product.service.abstract';
-import { ProductServiceImpl } from './services/product.service';
-import { ProductRepository, ProductRepositoryFactory } from './repositories/product.repository';
-import { ProductCategoryRepository, ProductCategoryRepositoryFactory }
-  from './repositories/product-category.repository';
 import { CategoryModule } from '../categories/category.module';
+import { ProductController } from './controllers';
+import {
+  ProductCategoryRepository, ProductCategoryRepositoryFactory,
+  ProductRepository, ProductRepositoryFactory,
+} from './repositories';
+import { ProductService, ProductServiceImpl } from './services';
 
 const productService: Provider = { provide: ProductService, useClass: ProductServiceImpl };
 

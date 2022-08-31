@@ -1,6 +1,6 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { CategoryServiceImpl } from './category.service';
+import { CategoryServiceImpl } from '.';
 
 describe('CategoryService', () => {
   let service: CategoryServiceImpl;

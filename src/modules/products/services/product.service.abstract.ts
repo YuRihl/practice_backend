@@ -1,9 +1,8 @@
-import type { UpdateResponse } from 'src/@types';
-import type { CreateProductDto } from '../dtos/create-product.dto';
-import type { UpdateProductDto } from '../dtos/update-product.dto';
+
+import type { CreateProductDto, UpdateProductDto } from '../dtos';
 import type { Product } from '../entities';
 
-export default abstract class ProductService {
+export abstract class ProductService {
 
   public abstract findAllProducts(
     categories: string[],

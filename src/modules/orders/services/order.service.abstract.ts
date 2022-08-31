@@ -1,9 +1,9 @@
-import type { UpdateResponse } from 'src/@types';
 import type { User } from '../../users/entities';
 import type { CreateOrderDto, UpdateOrderDto } from '../dtos';
-import type { Order, OrderStatus } from '../entities';
+import type { Order } from '../entities';
+import type { OrderStatus } from '../entities/order-status.enum';
 
-export default abstract class OrderService {
+export abstract class OrderService {
 
   public abstract findAllOrders(userId: number, status: OrderStatus): Promise<Order[]>;
   public abstract findOneOrder(id: number, userId: number): Promise<Order>;

@@ -1,12 +1,11 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import type { UpdateResponse } from '../../../@types';
 import type { RegisterDto } from '../../auth/dtos';
-import type { UpdateUserDto } from '../dtos/update-user.dto';
+import type { UpdateUserDto } from '../dtos';
 import type { User } from '../entities';
 import { IUserRepository } from '../interfaces';
-import { UserRepository } from '../repositories/user.repository';
-import UserService from './user.service.abstract';
+import { UserRepository } from '../repositories';
+import { UserService } from './user.service.abstract';
 
 @Injectable()
 export class UserServiceImpl extends UserService {
@@ -22,8 +21,9 @@ export class UserServiceImpl extends UserService {
   }
 
   public async findOneUser(idOrEmail: number | string): Promise<User> {
-    const user =
-      await this.userRepository.findOneById(typeof idOrEmail === 'number' ? { id: idOrEmail } : { email: idOrEmail });
+    const user = await this.userRepository.findOne({
+      where: typeof idOrEmail === 'number' ? { id: idOrEmail } : { email: idOrEmail },
+    });
     if (!user) throw new NotFoundException(`User with ${idOrEmail} not found`);
 
     return user;

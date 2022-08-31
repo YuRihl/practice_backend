@@ -1,9 +1,13 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import {
+  Body, Controller, Delete, Get, HttpCode,
+  HttpStatus, Param, ParseIntPipe, Patch, Post, UseGuards,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import type { UpdateResponse } from '../../../@types';
-import { CreateCategoryDto, UpdateCategoryDto } from '../dtos';
-import type { Category } from '../entities';
-import CategoryService from '../services/category.service.abstract';
+import { Role, Roles } from '../../../@framework/decorators';
+import { JwtGuard, RolesGuard } from '../../../@framework/guards';
+
+import { CategoryDto, CreateCategoryDto, UpdateCategoryDto } from '../dtos';
+import { CategoryService } from '../services';
 
 @ApiTags('Product Category')
 @Controller('categories')
@@ -12,26 +16,32 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) { }
 
   @Get()
-  public findAllCategories(): Promise<Category[]> {
-    return this.categoryService.findAllCategories();
+  public async findAllCategories(): Promise<CategoryDto[]> {
+    return CategoryDto.fromEntities(await this.categoryService.findAllCategories());
   }
 
   @Get(':id')
-  public findOneCategory(@Param('id', ParseIntPipe) id: number): Promise<Category> {
-    return this.categoryService.findOneCategory(id);
+  public async findOneCategory(@Param('id', ParseIntPipe) id: number): Promise<CategoryDto> {
+    return CategoryDto.fromEntity(await this.categoryService.findOneCategory(id));
   }
 
+  @Roles(Role.Admin)
+  @UseGuards(JwtGuard, RolesGuard)
   @Post()
-  public createOneCategory(@Body() createCategoryDto: CreateCategoryDto): Promise<Category> {
-    return this.categoryService.createOneCategory(createCategoryDto);
+  public async createOneCategory(@Body() createCategoryDto: CreateCategoryDto): Promise<CategoryDto> {
+    return CategoryDto.fromEntity(await this.categoryService.createOneCategory(createCategoryDto));
   }
 
+  @Roles(Role.Admin)
+  @UseGuards(JwtGuard, RolesGuard)
   @Patch(':id')
   public updateOneCategory(@Param('id', ParseIntPipe) id: number, @Body() updateCategoryDto: UpdateCategoryDto)
     : Promise<UpdateResponse> {
     return this.categoryService.updateOneCategory(id, updateCategoryDto);
   }
 
+  @Roles(Role.Admin)
+  @UseGuards(JwtGuard, RolesGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   public deleteOneCategory(@Param('id', ParseIntPipe) id: number): Promise<void> {

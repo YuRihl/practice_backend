@@ -1,13 +1,13 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import type { UpdateResponse } from 'src/@types';
-import ProductService from 'src/modules/products/services/product.service.abstract';
-import type { User } from 'src/modules/users/entities';
 import type { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
+import { OrderService } from './order.service.abstract';
+import { ProductService } from '../../products/services';
+import type { User } from '../../users/entities';
 import type { CreateOrderDto, UpdateOrderDto } from '../dtos';
-import type { OrderStatus, Order } from '../entities';
+import type { Order } from '../entities';
 import { IOrderItemRepository, IOrderRepository } from '../interfaces';
 import { OrderItemRepository, OrderRepository } from '../repositories';
-import OrderService from './order.service.abstract';
+import type { OrderStatus } from '../entities/order-status.enum';
 
 @Injectable()
 export class OrderServiceImpl extends OrderService {

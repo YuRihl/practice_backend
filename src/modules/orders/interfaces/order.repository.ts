@@ -1,4 +1,3 @@
-import type { UpdateResponse } from '../../../@types';
 import type { Repository } from 'typeorm';
 import type { UpdateOrderDto } from '../dtos';
 import type { Order } from '../entities';

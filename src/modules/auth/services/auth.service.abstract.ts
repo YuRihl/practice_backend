@@ -1,9 +1,9 @@
-import type { LoginDto, RegisterDto, AuthResponseDto } from '../dtos';
+import type { LoginDto, RegisterDto, AuthDto } from '../dtos';
 
-export default abstract class AuthService {
+export abstract class AuthService {
 
-  public abstract login(userDto: LoginDto): Promise<AuthResponseDto>;
-  public abstract register(userDto: RegisterDto): Promise<AuthResponseDto>;
-  public abstract signToken(id: number, email: string): Promise<AuthResponseDto>;
+  public abstract login(userDto: LoginDto): Promise<AuthDto>;
+  public abstract register(userDto: RegisterDto): Promise<AuthDto>;
+  public abstract signToken(id: number, email: string): Promise<AuthDto>;
 
 }

@@ -5,12 +5,10 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { UserDecorator } from '../../../@framework/decorators';
 import { JwtGuard } from '../../../@framework/guards';
-import type { UpdateResponse } from '../../../@types';
 import { User } from '../../users/entities';
-import { CreateOrderDto, UpdateOrderDto } from '../dtos';
-import type { Order } from '../entities';
-import { OrderStatus } from '../entities';
-import OrderService from '../services/order.service.abstract';
+import { CreateOrderDto, OrderDto, UpdateOrderDto } from '../dtos';
+import { OrderStatus } from '../entities/order-status.enum';
+import { OrderService } from '../services';
 
 @ApiTags('User order history')
 @Controller('user/orders')
@@ -20,23 +18,23 @@ export class OrderController {
 
   @UseGuards(JwtGuard)
   @Get()
-  public findAllOrders(@UserDecorator() user: User,
+  public async findAllOrders(@UserDecorator() user: User,
     @Query('status', new DefaultValuePipe(OrderStatus.Pending), new ParseEnumPipe(OrderStatus)) status: OrderStatus)
-    : Promise<Order[]> {
-    return this.orderService.findAllOrders(user.id, status);
+    : Promise<OrderDto[]> {
+    return OrderDto.fromEntities(await this.orderService.findAllOrders(user.id, status));
   }
 
   @UseGuards(JwtGuard)
   @Get(':id')
-  public findOneOrder(@UserDecorator() user: User, @Param('id', ParseIntPipe) id: number): Promise<Order> {
-    return this.orderService.findOneOrder(id, user.id);
+  public async findOneOrder(@UserDecorator() user: User, @Param('id', ParseIntPipe) id: number): Promise<OrderDto> {
+    return OrderDto.fromEntity(await this.orderService.findOneOrder(id, user.id));
   }
 
   @UseGuards(JwtGuard)
   @Post()
-  public createOneOrder(@UserDecorator() user: User,
-    @Body(new ParseArrayPipe({ items: CreateOrderDto })) createOrderDtos: CreateOrderDto[]): Promise<Order> {
-    return this.orderService.createOneOrder(user, createOrderDtos);
+  public async createOneOrder(@UserDecorator() user: User,
+    @Body(new ParseArrayPipe({ items: CreateOrderDto })) createOrderDtos: CreateOrderDto[]): Promise<OrderDto> {
+    return OrderDto.fromEntity(await this.orderService.createOneOrder(user, createOrderDtos));
   }
 
   @UseGuards(JwtGuard)

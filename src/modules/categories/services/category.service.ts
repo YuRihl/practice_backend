@@ -1,11 +1,10 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import type { UpdateResponse } from '../../../@types';
 import type { FindOptionsSelect } from 'typeorm';
 import type { CreateCategoryDto, UpdateCategoryDto } from '../dtos';
 import type { Category } from '../entities';
 import { ICategoryRepository } from '../interfaces';
-import { CategoryRepository } from '../repositories/category.repository';
-import CategoryService from './category.service.abstract';
+import { CategoryRepository } from '../repositories';
+import { CategoryService } from './category.service.abstract';
 
 @Injectable()
 export class CategoryServiceImpl extends CategoryService {

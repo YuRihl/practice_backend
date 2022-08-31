@@ -4,14 +4,7 @@ import {
 } from 'typeorm';
 import { User } from '../../users/entities';
 import { OrderItem } from '.';
-
-export enum OrderStatus {
-  Pending = 'Pending',
-  Processing = 'Processing',
-  Completed = 'Completed',
-  Declined = 'Declined',
-  Failed = 'Failed'
-}
+import { OrderStatus } from './order-status.enum';
 
 @Entity()
 export class Order {

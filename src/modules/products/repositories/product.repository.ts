@@ -1,5 +1,4 @@
 import type { DataSource } from 'typeorm';
-import type { UpdateResponse } from '../../../@types';
 import type { CreateProductDto, UpdateProductDto } from '../dtos';
 import { Product } from '../entities';
 import type { IProductRepository } from '../interfaces';
