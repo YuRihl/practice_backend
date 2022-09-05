@@ -25,4 +25,19 @@ export class CartItem {
   @JoinColumn({ name: 'product_id' })
   public product!: Product;
 
+  public static from(data: Partial<CartItem>): CartItem {
+    const cartItem = new CartItem();
+
+    cartItem.id = data.id ?? 1;
+    cartItem.itemCount = data.itemCount ?? 1;
+    cartItem.user = data.user ?? new User();
+    cartItem.product = data.product ?? new Product();
+
+    return cartItem;
+  }
+
+  public static fromMany(data: Partial<CartItem>[]): CartItem[] {
+    return data.map(data => this.from(data));
+  }
+
 }

@@ -1,4 +1,4 @@
-import type { Product, ProductCategory } from '../entities';
+import type { Product } from '../entities';
 
 export class ProductDto {
 
@@ -9,7 +9,7 @@ export class ProductDto {
   public soldCount!: number;
   public description!: string;
   public content!: string;
-  public categories!: ProductCategory[];
+  public categoryIds!: number[];
 
   public static fromEntity(product: Product): ProductDto {
     const productDto = new ProductDto();
@@ -20,7 +20,9 @@ export class ProductDto {
     productDto.soldCount = product.soldCount;
     productDto.description = product.description;
     productDto.content = product.content;
-    productDto.categories = product.categories;
+
+    const categoryIds = product.categories.map(productCategory => productCategory.category.id);
+    productDto.categoryIds = categoryIds;
 
     return productDto;
   }

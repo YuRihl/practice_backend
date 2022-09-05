@@ -4,7 +4,7 @@ import type { Category } from '../entities';
 
 interface CustomRepository {
   createOne(createCategoryDto: CreateCategoryDto): Promise<Category>;
-  updateOne(category: Category, updateCategoryDto: UpdateCategoryDto): Promise<UpdateResponse>;
+  updateOne(category: Category, updateCategoryDto: UpdateCategoryDto): Promise<Category>;
 }
 
 type ICategoryRepository = CustomRepository & Repository<Category>

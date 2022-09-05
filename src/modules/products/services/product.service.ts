@@ -1,11 +1,8 @@
-import {
-  BadRequestException, Inject, Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import type { FindOptionsRelations } from 'typeorm';
 import { In, Like } from 'typeorm';
 import { CategoryService } from '../../categories/services';
-import type { CreateProductDto, UpdateProductDto } from '../dtos';
+import type { CreateProductDto, ProductQuery, UpdateProductDto } from '../dtos';
 import type { Product, ProductCategory } from '../entities';
 import { IProductCategoryRepository, IProductRepository } from '../interfaces';
 import { ProductCategoryRepository, ProductRepository } from '../repositories';
@@ -28,25 +25,31 @@ export class ProductServiceImpl extends ProductService {
     super();
   }
 
-  public async findAllProducts(
-    categories: string[],
-    name: string,
-    page: number,
-    perPage: number,
-  ): Promise<Product[]> {
-    if (page <= 0 || perPage < 0)
-      throw new BadRequestException('Pagination values are negative, but they have to be positive');
+  public async findAllProducts(query: ProductQuery): Promise<Product[]> {
+    const skip = (query.page && query.perPage) && (query.page - 1) * query.perPage;
+    const take = query.perPage;
 
-    const skip = (page - 1) * perPage;
-    const take = perPage;
+    // const products = await this.productRepository.createQueryBuilder('product')
+    //   .leftJoinAndSelect('product.categories', 'productCategories', 'product.id = productCategories.product_id')
+    //   .leftJoinAndSelect('productCategories.category', 'category', 'productCategories.category_id = category.id')
+    //   .leftJoinAndSelect
+    //    ('productCategories.category', 'categorySelect', 'productCategories.category_id = category.id')
+    //   .where('product.name LIKE :name', { name: `${name}%` })
+    //   .andWhere('category.id IN (:...productCategories)', { productCategories: categories })
+    //   .orderBy('product.id', 'ASC')
+    //   .skip(skip)
+    //   .take(take)
+    //   .getMany();
 
-    return await this.productRepository.find({
+    // return products;
+
+    return this.productRepository.find({
       relations: this._relationOptions,
       where: {
-        name: Like(`${name}%`),
+        name: Like(`${query.name}%`),
         categories: {
           category: {
-            name: categories.includes('All Category') ? undefined : In(categories),
+            id: query.categories && In(query.categories),
           },
         },
       },
@@ -72,42 +75,38 @@ export class ProductServiceImpl extends ProductService {
   public async createOneProduct(createProductDto: CreateProductDto): Promise<Product> {
     const product = await this.productRepository.createOne(createProductDto);
 
-    const categoryNames = createProductDto.categories;
-
-    if (categoryNames && categoryNames.length > 0) {
+    if (createProductDto.categoryIds.length > 0) {
       const newProductCategories: ProductCategory[] = [];
 
-      for (const name of categoryNames) {
-        const category = await this.categoryService.createOneCategory({ name });
+      for (const id of createProductDto.categoryIds) {
+        const category = await this.categoryService.findOneCategory(id);
         newProductCategories.push(await this.productCategoryRepository.createOne(product, category));
       }
 
       product.categories = newProductCategories;
-      return await this.findOneProduct(product.id);
+      return this.findOneProduct(product.id);
     }
 
     return product;
   }
 
-  public async updateOneProduct(id: number, updateProductDto: UpdateProductDto): Promise<UpdateResponse> {
+  public async updateOneProduct(id: number, updateProductDto: UpdateProductDto): Promise<Product> {
     const product = await this.findOneProduct(id);
 
-    const categoryNames = updateProductDto.categories;
-
-    if (categoryNames && categoryNames.length > 0) {
+    if (updateProductDto.categoryIds && updateProductDto.categoryIds.length > 0) {
       await this.productCategoryRepository.remove(product.categories);
 
       const newProductCategories: ProductCategory[] = [];
 
-      for (const name of categoryNames) {
-        const category = await this.categoryService.createOneCategory({ name });
+      for (const id of updateProductDto.categoryIds) {
+        const category = await this.categoryService.findOneCategory(id);
         newProductCategories.push(await this.productCategoryRepository.createOne(product, category));
       }
 
       product.categories = newProductCategories;
     }
 
-    return await this.productRepository.updateOne(product, updateProductDto);
+    return this.productRepository.updateOne(product, updateProductDto);
   }
 
   public async deleteOneProduct(id: number): Promise<void> {

@@ -1,17 +1,17 @@
-import type { Product } from '../../products/entities';
+import { ProductDto } from '../../products/dtos';
 import type { CartItem } from '../entities';
 
 export class CartItemDto {
 
   public id!: number;
   public itemCount!: number;
-  public product!: Product;
+  public product!: ProductDto;
 
   public static fromEntity(cartItem: CartItem): CartItemDto {
     const cartItemDto = new CartItemDto();
     cartItemDto.id = cartItem.id;
     cartItemDto.itemCount = cartItem.itemCount;
-    cartItemDto.product = cartItem.product;
+    cartItemDto.product = ProductDto.fromEntity(cartItem.product);
 
     return cartItemDto;
   }

@@ -13,8 +13,8 @@ export const CartItemRepositoryFactory =
       const cartItem = await this.findOne({ where: { user: { id: user.id }, product: { id: product.id } } });
 
       if (!cartItem) {
-        const newCartItem = await this.create({ user, product });
-        return await this.save(newCartItem);
+        const newCartItem = this.create({ user, product });
+        return this.save(newCartItem);
       }
 
       return cartItem;

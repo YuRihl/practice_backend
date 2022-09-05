@@ -7,9 +7,9 @@ export const OrderItemRepository = Symbol('ORDER_ITEM_REPOSITORY');
 
 export const OrderItemRepositoryFactory = (dataSource: DataSource): IOrderItemRepository =>
   dataSource.getRepository(OrderItem).extend({
-    async createOne(createOrderItemDto: CreateOrderItemDto): Promise<OrderItem> {
-      const orderItem = await this.create(createOrderItemDto);
+    createOne(createOrderItemDto: CreateOrderItemDto): Promise<OrderItem> {
+      const orderItem = this.create(createOrderItemDto);
 
-      return await this.save(orderItem);
+      return this.save(orderItem);
     },
   });

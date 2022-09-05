@@ -1,5 +1,5 @@
+import { Transform } from 'class-transformer';
 import {
-  IsArray,
   IsInt,
   IsNotEmpty,
   IsOptional,
@@ -14,6 +14,7 @@ export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(50)
+  @Transform(({ value }) => (value as string).trim())
   public name!: string;
 
   @IsPositive()
@@ -22,24 +23,23 @@ export class CreateProductDto {
   @IsOptional()
   @IsInt()
   @Min(0)
-  public availableCount?: number;
+  public availableCount?: number = 0;
 
   @IsOptional()
   @IsInt()
   @Min(0)
-  public soldCount?: number;
+  public soldCount?: number = 0;
 
   @IsOptional()
   @IsString()
-  public description?: string;
+  public description?: string = '';
 
   @IsOptional()
   @IsString()
-  public content?: string;
+  public content?: string = '';
 
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  public categories?: string[];
+  @IsInt({ each: true })
+  @Min(1, { each: true })
+  public categoryIds!: number[];
 
 }

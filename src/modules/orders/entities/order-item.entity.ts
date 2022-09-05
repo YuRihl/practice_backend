@@ -22,4 +22,20 @@ export class OrderItem {
   @JoinColumn({ name: 'order_id' })
   public order!: Order;
 
+  public static from(data: Partial<OrderItem>): OrderItem {
+    const orderItem = new OrderItem();
+
+    orderItem.id = data.id ?? 1;
+    orderItem.orderCount = data.orderCount ?? 1;
+    orderItem.orderPrice = data.orderPrice ?? 0;
+    orderItem.order = data.order ?? new Order();
+    orderItem.product = data.product ?? new Product();
+
+    return orderItem;
+  }
+
+  public static fromMany(data: Partial<OrderItem>[]): OrderItem[] {
+    return data.map(data => this.from(data));
+  }
+
 }

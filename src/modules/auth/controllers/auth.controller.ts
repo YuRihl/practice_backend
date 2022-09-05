@@ -12,12 +12,12 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('auth/login')
-  public async login(@Body() body: LoginDto): Promise<AuthDto> {
+  public login(@Body() body: LoginDto): Promise<AuthDto> {
     return this.authService.login(body);
   }
 
   @Post('auth/register')
-  public async register(@Body() body: RegisterDto): Promise<AuthDto> {
+  public register(@Body() body: RegisterDto): Promise<AuthDto> {
     return this.authService.register(body);
   }
 

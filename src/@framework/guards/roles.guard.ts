@@ -1,6 +1,5 @@
 import type { CanActivate, ExecutionContext } from '@nestjs/common';
-import { UnauthorizedException } from '@nestjs/common';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Role } from '../decorators';
 import { ROLES_KEY } from '../decorators';
@@ -23,8 +22,6 @@ export class RolesGuard implements CanActivate {
     const { user }: Express.Request = context.switchToHttp().getRequest();
     if (!user) throw new UnauthorizedException('User not authorized');
 
-    // eslint-disable-next-line max-len
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     return requiredRoles.some((requiredRole) => (user as any)?.role?.includes(requiredRole));
   }
 

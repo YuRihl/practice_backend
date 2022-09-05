@@ -1,11 +1,13 @@
-import { Min } from 'class-validator';
+import { IsInt, IsPositive } from 'class-validator';
 
 export class CreateOrderDto {
 
-  @Min(1)
+  @IsPositive()
+  @IsInt()
   public productId!: number;
 
-  @Min(1)
+  @IsPositive()
+  @IsInt()
   public productCount!: number;
 
 }

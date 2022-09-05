@@ -2,7 +2,6 @@ import type { ConfigModule } from '@nestjs/config';
 import Joi from 'joi';
 
 const configModuleConfig: ConfigModule = {
-  envFilePath: 'src/config/.env',
   isGlobal: true,
   validationSchema: Joi.object({
     PORT: Joi.number().default(3000),

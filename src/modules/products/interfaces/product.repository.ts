@@ -4,7 +4,7 @@ import type { Product } from '../entities';
 
 interface CustomRepository {
   createOne(createProductDto: CreateProductDto): Promise<Product>;
-  updateOne(product: Product, updateProductDto: UpdateProductDto): Promise<UpdateResponse>;
+  updateOne(product: Product, updateProductDto: UpdateProductDto): Promise<Product>;
 }
 
 type IProductRepository = CustomRepository & Repository<Product>;

@@ -1,7 +1,8 @@
 import { applyDecorators, UseInterceptors } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes } from '@nestjs/swagger';
-import type { ApplyDecorators, UploadFile, ApiBodyProperty } from '../../@types';
+import type { UploadFile, ApplyDecorators } from '../../@types/framework';
+import type { ApiBodyProperty } from '../../@types/swagger';
 
 export const UseFiles = (
   files: UploadFile[],

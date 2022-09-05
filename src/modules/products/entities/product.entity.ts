@@ -49,4 +49,25 @@ export class Product {
   @OneToMany(() => OrderItem, (orderItem) => orderItem.product)
   public orders!: OrderItem[];
 
+  public static from(data: Partial<Product>): Product {
+    const product = new Product();
+
+    product.id = data.id ?? 1;
+    product.name = data.name ?? '';
+    product.price = data.price ?? 0;
+    product.availableCount = data.availableCount ?? 0;
+    product.soldCount = data.soldCount ?? 0;
+    product.description = data.description ?? '';
+    product.content = data.content ?? '';
+    product.categories = data.categories ?? [];
+    product.cartItems = data.cartItems ?? [];
+    product.orders = data.orders ?? [];
+
+    return product;
+  }
+
+  public static fromMany(data: Partial<Product>[]): Product[] {
+    return data.map(data => this.from(data));
+  }
+
 }

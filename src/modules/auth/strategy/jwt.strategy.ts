@@ -20,8 +20,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  public async validate(payload: PayloadDto): Promise<User> {
-    return await this.userService.findOneUser(payload.sub);
+  public validate(payload: PayloadDto): Promise<User> {
+    return this.userService.findOneUser(payload.sub);
   }
 
 }

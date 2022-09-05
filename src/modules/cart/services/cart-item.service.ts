@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import type { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
+import type { FindOptionsRelations } from 'typeorm';
 import { CartItemService } from './cart-item.service.abstract';
 import { ProductService } from '../../products/services';
 import type { User } from '../../users/entities';
@@ -11,14 +11,6 @@ import { CartItemRepository } from '../repositories';
 @Injectable()
 export class CartItemServiceImpl extends CartItemService {
 
-  private _selectOptions: FindOptionsSelect<CartItem> = {
-    product: {
-      id: true,
-      name: true,
-      price: true,
-    },
-  };
-
   private _relationOptions: FindOptionsRelations<CartItem> = {
     product: true,
   };
@@ -28,9 +20,8 @@ export class CartItemServiceImpl extends CartItemService {
     @Inject(ProductService) private readonly productService: ProductService,
   ) { super(); }
 
-  public async findAllCartItems(userId: number): Promise<CartItem[]> {
-    return await this.cartItemRepository.find({
-      select: this._selectOptions,
+  public findAllCartItems(userId: number): Promise<CartItem[]> {
+    return this.cartItemRepository.find({
       relations: this._relationOptions,
       where: { user: { id: userId } },
     });
@@ -38,7 +29,6 @@ export class CartItemServiceImpl extends CartItemService {
 
   public async findOneCartItem(id: number, userId: number): Promise<CartItem> {
     const cartItem = await this.cartItemRepository.findOne({
-      select: this._selectOptions,
       relations: this._relationOptions,
       where: { id, user: { id: userId } },
     });
@@ -47,7 +37,7 @@ export class CartItemServiceImpl extends CartItemService {
     return cartItem;
   }
 
-  public async createOneCartItem(user: User, createCartItemDto: CreateCartItemDto): Promise<CartItem | void> {
+  public async createOneCartItem(user: User, createCartItemDto: CreateCartItemDto): Promise<CartItem> {
     const product = await this.productService.findOneProduct(createCartItemDto.productId);
 
     const createResult = await this.cartItemRepository.createOne(user, product);
@@ -55,7 +45,7 @@ export class CartItemServiceImpl extends CartItemService {
 
     const cartItem = await this.findOneCartItem(createResult.id, user.id);
 
-    return await this.checkItemCount(cartItem);
+    return this.checkItemCount(cartItem);
   }
 
   public async deleteOneCartItem(id: number, userId: number): Promise<void> {
@@ -65,9 +55,13 @@ export class CartItemServiceImpl extends CartItemService {
 
   }
 
-  public async checkItemCount(cartItem: CartItem): Promise<CartItem | void> {
+  public async checkItemCount(cartItem: CartItem): Promise<CartItem> {
     if (cartItem.itemCount <= 0) {
-      await this.cartItemRepository.remove(cartItem);
+      const removedCartItem = await this.cartItemRepository.remove(cartItem);
+
+      removedCartItem.itemCount = 0;
+
+      return removedCartItem;
     }
 
     return cartItem;

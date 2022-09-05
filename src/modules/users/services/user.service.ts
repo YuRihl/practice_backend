@@ -16,8 +16,8 @@ export class UserServiceImpl extends UserService {
     super();
   }
 
-  public async findAllUsers(): Promise<User[]> {
-    return await this.userRepository.find();
+  public findAllUsers(): Promise<User[]> {
+    return this.userRepository.find();
   }
 
   public async findOneUser(idOrEmail: number | string): Promise<User> {
@@ -32,12 +32,12 @@ export class UserServiceImpl extends UserService {
   public async createOneUser(registerDto: RegisterDto): Promise<User> {
     const hashSalt = await bcrypt.genSalt();
 
-    return await this.userRepository
+    return this.userRepository
       .createOne({ ...registerDto, password: await bcrypt.hash(registerDto.password, hashSalt) });
   }
 
-  public async updateOneUser(user: User, updateUserDto: UpdateUserDto): Promise<UpdateResponse> {
-    return await this.userRepository.updateOne(user, updateUserDto);
+  public updateOneUser(user: User, updateUserDto: UpdateUserDto): Promise<User> {
+    return this.userRepository.updateOne(user, updateUserDto);
   }
 
   public async deleteOneUser(user: User): Promise<void> {

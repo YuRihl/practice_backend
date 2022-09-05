@@ -76,7 +76,7 @@ export class PhotoServiceImpl extends PhotoService {
     }
   }
 
-  public async uploadS3(photoBuffer: Buffer, key: string, type: string): Promise<S3.ManagedUpload.SendData> {
+  public uploadS3(photoBuffer: Buffer, key: string, type: string): Promise<S3.ManagedUpload.SendData> {
     const params: S3.PutObjectRequest = {
       Bucket: this.configService.get<string>('AWS_BUCKET') as string,
       Body: photoBuffer,
@@ -85,7 +85,7 @@ export class PhotoServiceImpl extends PhotoService {
       ACL: 'public-read',
     };
 
-    return await this.s3.upload(params).promise();
+    return this.s3.upload(params).promise();
   }
 
 }

@@ -28,4 +28,19 @@ export class Order {
   @OneToMany(() => OrderItem, (orderItem) => orderItem.order)
   public items!: OrderItem[];
 
+  public static from(data: Partial<Order>): Order {
+    const order = new Order();
+
+    order.id = data.id ?? 1;
+    order.status = data.status ?? OrderStatus.Pending;
+    order.items = data.items ?? [];
+    order.user = data.user ?? new User();
+
+    return order;
+  }
+
+  public static fromMany(data: Partial<Order>[]): Order[] {
+    return data.map(data => this.from(data));
+  }
+
 }

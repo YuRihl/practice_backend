@@ -1,36 +1,20 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import type { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
+import type { FindOptionsRelations } from 'typeorm';
 import { OrderService } from './order.service.abstract';
 import { ProductService } from '../../products/services';
 import type { User } from '../../users/entities';
 import type { CreateOrderDto, UpdateOrderDto } from '../dtos';
+import { OrderDto } from '../dtos';
 import type { Order } from '../entities';
 import { IOrderItemRepository, IOrderRepository } from '../interfaces';
 import { OrderItemRepository, OrderRepository } from '../repositories';
 import type { OrderStatus } from '../entities/order-status.enum';
+import { ProductDto } from '../../../modules/products/dtos';
 
 @Injectable()
 export class OrderServiceImpl extends OrderService {
 
-  private _selectOptions: FindOptionsSelect<Order> = {
-    items: {
-      product: {
-        id: true,
-        name: true,
-      },
-      id: true,
-      orderCount: true,
-      orderPrice: true,
-    },
-    user: {
-      id: true,
-      firstName: true,
-      secondName: true,
-    },
-  };
-
   private _relationOptions: FindOptionsRelations<Order> = {
-    user: true,
     items: {
       product: true,
     },
@@ -42,9 +26,8 @@ export class OrderServiceImpl extends OrderService {
     super();
   }
 
-  public async findAllOrders(userId: number, status: OrderStatus): Promise<Order[]> {
-    return await this.orderRepository.find({
-      select: this._selectOptions,
+  public findAllOrders(userId: number, status: OrderStatus): Promise<Order[]> {
+    return this.orderRepository.find({
       relations: this._relationOptions,
       where: { user: { id: userId }, status },
       order: {
@@ -55,7 +38,6 @@ export class OrderServiceImpl extends OrderService {
 
   public async findOneOrder(id: number, userId: number): Promise<Order> {
     const order = await this.orderRepository.findOne({
-      select: this._selectOptions,
       relations: this._relationOptions,
       where: { id, user: { id: userId } },
     });
@@ -70,16 +52,19 @@ export class OrderServiceImpl extends OrderService {
     for (const { productId, productCount } of createOrderDtos) {
       const product = await this.productService.findOneProduct(productId);
       await this.orderItemRepository.createOne(
-        { orderCount: productCount, orderPrice: product.price, product, order });
+        {
+          orderCount: productCount, orderPrice: product.price,
+          product: ProductDto.fromEntity(product), order: OrderDto.fromEntity(order),
+        });
     }
 
-    return await this.findOneOrder(order.id, user.id);
+    return this.findOneOrder(order.id, user.id);
   }
 
-  public async updateOneOrder(id: number, userId: number, updateOrderDto: UpdateOrderDto): Promise<UpdateResponse> {
+  public async updateOneOrder(id: number, userId: number, updateOrderDto: UpdateOrderDto): Promise<Order> {
     const order = await this.findOneOrder(id, userId);
 
-    return await this.orderRepository.updateOne(order, updateOrderDto);
+    return this.orderRepository.updateOne(order, updateOrderDto);
   }
 
   public async deleteOneOrder(id: number, userId: number): Promise<void> {

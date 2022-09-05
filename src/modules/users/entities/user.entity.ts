@@ -46,4 +46,24 @@ export class User {
   @OneToMany(() => CartItem, (cartItem) => cartItem.user)
   public cartItems!: CartItem[];
 
+  public static from(data: Partial<User> & Pick<User, 'email' | 'password'>): User {
+    const user = new User();
+
+    user.id = data.id ?? 1;
+    user.email = data.email;
+    user.isVerified = data.isVerified ?? false;
+    user.password = data.password;
+    user.firstName = data.firstName ?? '';
+    user.secondName = data.secondName ?? '';
+    user.role = data.role ?? Role.User;
+    user.orders = data.orders ?? [];
+    user.cartItems = data.cartItems ?? [];
+
+    return user;
+  }
+
+  public static fromMany(data: (Partial<User> & Pick<User, 'email' | 'password'>)[]): User[] {
+    return data.map(data => this.from(data));
+  }
+
 }

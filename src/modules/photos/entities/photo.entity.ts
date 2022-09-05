@@ -26,4 +26,20 @@ export class Photo {
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   public createdAt!: Date;
 
+  public static from(data: Partial<Photo>): Photo {
+    const photo = new Photo();
+
+    photo.id = data.id ?? 1;
+    photo.key = data.key ?? '';
+    photo.path = data.path ?? './' + photo.key;
+    photo.size = data.size ?? 1;
+    photo.type = data.type ?? '';
+
+    return photo;
+  }
+
+  public static fromMany(data: Partial<Photo>[]): Photo[] {
+    return data.map(data => this.from(data));
+  }
+
 }

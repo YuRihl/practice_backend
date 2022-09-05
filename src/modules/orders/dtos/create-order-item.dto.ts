@@ -1,11 +1,11 @@
-import type { Product } from '../../products/entities';
-import type { Order } from '../entities';
+import type { ProductDto } from '../../products/dtos';
+import type { OrderDto } from './order.dto';
 
 export class CreateOrderItemDto {
 
   public orderCount!: number;
   public orderPrice!: number;
-  public product!: Product;
-  public order!: Order;
+  public product!: ProductDto;
+  public order!: OrderDto;
 
 }

@@ -10,12 +10,10 @@ import {
   Query,
   UploadedFile,
   UploadedFiles,
-  UseGuards,
 } from '@nestjs/common';
 import { ParseArrayPipe } from '@nestjs/common/pipes';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Role, Roles, UseFile, UseFiles, UserDecorator } from '../../../@framework/decorators';
-import { JwtGuard, RolesGuard } from '../../../@framework/guards';
+import { ApiTags } from '@nestjs/swagger';
+import { Role, UseSecurity, UseFile, UseFiles, UserDecorator } from '../../../@framework/decorators';
 import { CreateProductPhotosDto, PhotoDto } from '../dtos';
 import { PhotoOwner } from '../entities';
 import { PhotoService } from '../services';
@@ -26,8 +24,7 @@ export class PhotoController {
 
   constructor(private readonly photoService: PhotoService) { }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtGuard)
+  @UseSecurity(Role.User, Role.Admin)
   @Get('user')
   public async findUserPhoto(@UserDecorator('id' as keyof Express.User) id: number): Promise<PhotoDto> {
     return PhotoDto.fromEntity(await this.photoService.findPhoto(`${PhotoOwner.User}/${id}/`));
@@ -43,9 +40,8 @@ export class PhotoController {
     return PhotoDto.fromEntity(await this.photoService.findPhoto(`${PhotoOwner.Category}/${id}/`));
   }
 
+  @UseSecurity(Role.User, Role.Admin)
   @UseFile('photo')
-  @ApiBearerAuth()
-  @UseGuards(JwtGuard)
   @Post('user')
   public async createUserPhoto(@UserDecorator('id' as keyof Express.User) id: number,
     @UploadedFile() photo: Express.Multer.File): Promise<PhotoDto> {
@@ -53,8 +49,7 @@ export class PhotoController {
       { keyPrefix: `${PhotoOwner.User}/${id}/`, buffer: photo.buffer, size: photo.size, mimetype: photo.mimetype }));
   }
 
-  @Roles(Role.Admin)
-  @UseGuards(JwtGuard, RolesGuard)
+  @UseSecurity(Role.Admin)
   @UseFiles([
     { name: 'main', maxCount: 1, required: true },
     { name: 'additional', maxCount: 3, required: false }], ['additional'])
@@ -64,8 +59,7 @@ export class PhotoController {
     return PhotoDto.fromEntities(await this.photoService.createProductPhotos(`${PhotoOwner.Product}/${id}/`, photos));
   }
 
-  @Roles(Role.Admin)
-  @UseGuards(JwtGuard, RolesGuard)
+  @UseSecurity(Role.Admin)
   @UseFile('photo')
   @Post('category/:id')
   public async createCategoryPhoto(@Param('id', ParseIntPipe) id: number,
@@ -77,16 +71,14 @@ export class PhotoController {
       }));
   }
 
-  @Roles(Role.Admin)
-  @UseGuards(JwtGuard, RolesGuard)
+  @UseSecurity(Role.Admin)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   public deletePhoto(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.photoService.deletePhoto(id);
   }
 
-  @Roles(Role.Admin)
-  @UseGuards(JwtGuard, RolesGuard)
+  @UseSecurity(Role.Admin)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete()
   public deletePhotos(@Query('ids', new ParseArrayPipe({ items: Number, separator: ',' })) ids: number[])

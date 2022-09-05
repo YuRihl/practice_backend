@@ -1,12 +1,11 @@
 import {
-  Body, Controller, DefaultValuePipe, Delete, Get, HttpCode,
-  HttpStatus, Param, ParseArrayPipe, ParseIntPipe, Patch, Post, Query, UseGuards,
+  Body, Controller, Delete, Get, HttpCode,
+  HttpStatus, Param, ParseIntPipe, Patch, Post, Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
-import { Role, Roles } from '../../../@framework/decorators';
-import { JwtGuard, RolesGuard } from '../../../@framework/guards';
-import { CreateProductDto, ProductDto, UpdateProductDto } from '../dtos';
+import { Role, UseSecurity } from '../../../@framework/decorators';
+import { CreateProductDto, ProductDto, ProductQuery, UpdateProductDto } from '../dtos';
 import { ProductService } from '../services';
 
 @ApiTags('Product')
@@ -17,13 +16,10 @@ export class ProductController {
 
   @Get()
   public async findAllProducts(
-    @Query('categories', new DefaultValuePipe(['All Category']),
-      new ParseArrayPipe({ items: String, separator: ',' })) categories: string[],
-    @Query('name', new DefaultValuePipe('')) name: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('per_page', new DefaultValuePipe(0), ParseIntPipe) perPage: number,
+    @Query() query: ProductQuery,
   ): Promise<ProductDto[]> {
-    return ProductDto.fromEntities(await this.productService.findAllProducts(categories, name, page, perPage));
+    return ProductDto.fromEntities(
+      await this.productService.findAllProducts(query));
   }
 
   @Get(':id')
@@ -31,23 +27,20 @@ export class ProductController {
     return ProductDto.fromEntity(await this.productService.findOneProduct(id));
   }
 
-  @Roles(Role.Admin)
-  @UseGuards(JwtGuard, RolesGuard)
+  @UseSecurity(Role.Admin)
   @Post()
   public async createOneProduct(@Body() createProductDto: CreateProductDto): Promise<ProductDto> {
     return ProductDto.fromEntity(await this.productService.createOneProduct(createProductDto));
   }
 
-  @Roles(Role.Admin)
-  @UseGuards(JwtGuard, RolesGuard)
+  @UseSecurity(Role.Admin)
   @Patch(':id')
-  public updateOneProduct(
-    @Param('id', ParseIntPipe) id: number, @Body() updateProductDto: UpdateProductDto): Promise<UpdateResponse> {
-    return this.productService.updateOneProduct(id, updateProductDto);
+  public async updateOneProduct(
+    @Param('id', ParseIntPipe) id: number, @Body() updateProductDto: UpdateProductDto): Promise<ProductDto> {
+    return ProductDto.fromEntity(await this.productService.updateOneProduct(id, updateProductDto));
   }
 
-  @Roles(Role.Admin)
-  @UseGuards(JwtGuard, RolesGuard)
+  @UseSecurity(Role.Admin)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   public deleteOneProduct(@Param('id', ParseIntPipe) id: number): Promise<void> {

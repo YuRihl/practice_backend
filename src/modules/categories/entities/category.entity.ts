@@ -26,4 +26,17 @@ export class Category {
   @OneToMany(() => ProductCategory, (productCategory) => productCategory.category)
   public products!: ProductCategory[];
 
+  public static from(data: Partial<Category>): Category {
+    const category = new Category();
+    category.id = data.id ?? 1;
+    category.name = data.name ?? '';
+    category.products = data.products ?? [];
+
+    return category;
+  }
+
+  public static fromMany(data: Partial<Category>[]): Category[] {
+    return data.map(data => this.from(data));
+  }
+
 }

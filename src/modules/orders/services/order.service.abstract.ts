@@ -8,7 +8,7 @@ export abstract class OrderService {
   public abstract findAllOrders(userId: number, status: OrderStatus): Promise<Order[]>;
   public abstract findOneOrder(id: number, userId: number): Promise<Order>;
   public abstract createOneOrder(user: User, createOrderDtos: CreateOrderDto[]): Promise<Order>;
-  public abstract updateOneOrder(id: number, userId: number, updateOrderDto: UpdateOrderDto): Promise<UpdateResponse>;
+  public abstract updateOneOrder(id: number, userId: number, updateOrderDto: UpdateOrderDto): Promise<Order>;
   public abstract deleteOneOrder(id: number, userId: number): Promise<void>;
 
 }

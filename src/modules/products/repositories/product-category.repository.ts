@@ -10,11 +10,9 @@ export const ProductCategoryRepositoryFactory =
   (dataSource: DataSource): IProductCategoryRepository =>
     dataSource.getRepository(ProductCategory).extend({
       async createOne(product: Product, category: Category): Promise<ProductCategory> {
-        const productCategory = await this.create({ product, category });
+        const productCategory = this.create({ product, category });
 
-        const newProductCategory = await this.save(productCategory);
-
-        return newProductCategory;
+        return this.save(productCategory);
       },
     });
 

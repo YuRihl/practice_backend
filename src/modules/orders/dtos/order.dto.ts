@@ -1,6 +1,6 @@
-import type { User } from '../../users/entities';
-import type { Order, OrderItem } from '../entities';
+import { OrderItemDto } from '.';
 import type { OrderStatus } from '../entities/order-status.enum';
+import type { Order } from '../entities';
 
 export class OrderDto {
 
@@ -8,8 +8,7 @@ export class OrderDto {
   public status!: OrderStatus;
   public createdAt!: Date;
   public updatedAt!: Date;
-  public user!: User;
-  public items!: OrderItem[];
+  public items!: OrderItemDto[];
 
   public static fromEntity(order: Order): OrderDto {
     const orderDto = new OrderDto();
@@ -17,8 +16,7 @@ export class OrderDto {
     orderDto.status = order.status;
     orderDto.createdAt = order.createdAt;
     orderDto.updatedAt = order.updatedAt;
-    orderDto.user = order.user;
-    orderDto.items = order.items;
+    orderDto.items = OrderItemDto.fromEntities(order.items);
 
     return orderDto;
   }

@@ -5,7 +5,7 @@ import type { User } from '../../users/entities';
 
 interface CustomRepository {
   createOne(user: User): Promise<Order>;
-  updateOne(order: Order, updateOrderDto: UpdateOrderDto): Promise<UpdateResponse>;
+  updateOne(order: Order, updateOrderDto: UpdateOrderDto): Promise<Order>;
 }
 
 type IOrderRepository = CustomRepository & Repository<Order>

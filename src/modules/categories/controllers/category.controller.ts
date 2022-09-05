@@ -1,15 +1,13 @@
 import {
   Body, Controller, Delete, Get, HttpCode,
-  HttpStatus, Param, ParseIntPipe, Patch, Post, UseGuards,
+  HttpStatus, Param, ParseIntPipe, Patch, Post,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { Role, Roles } from '../../../@framework/decorators';
-import { JwtGuard, RolesGuard } from '../../../@framework/guards';
-
+import { Role, UseSecurity } from '../../../@framework/decorators';
 import { CategoryDto, CreateCategoryDto, UpdateCategoryDto } from '../dtos';
 import { CategoryService } from '../services';
 
-@ApiTags('Product Category')
+@ApiTags('Category')
 @Controller('categories')
 export class CategoryController {
 
@@ -25,23 +23,20 @@ export class CategoryController {
     return CategoryDto.fromEntity(await this.categoryService.findOneCategory(id));
   }
 
-  @Roles(Role.Admin)
-  @UseGuards(JwtGuard, RolesGuard)
+  @UseSecurity(Role.Admin)
   @Post()
   public async createOneCategory(@Body() createCategoryDto: CreateCategoryDto): Promise<CategoryDto> {
     return CategoryDto.fromEntity(await this.categoryService.createOneCategory(createCategoryDto));
   }
 
-  @Roles(Role.Admin)
-  @UseGuards(JwtGuard, RolesGuard)
+  @UseSecurity(Role.Admin)
   @Patch(':id')
-  public updateOneCategory(@Param('id', ParseIntPipe) id: number, @Body() updateCategoryDto: UpdateCategoryDto)
-    : Promise<UpdateResponse> {
-    return this.categoryService.updateOneCategory(id, updateCategoryDto);
+  public async updateOneCategory(@Param('id', ParseIntPipe) id: number, @Body() updateCategoryDto: UpdateCategoryDto)
+    : Promise<CategoryDto> {
+    return CategoryDto.fromEntity(await this.categoryService.updateOneCategory(id, updateCategoryDto));
   }
 
-  @Roles(Role.Admin)
-  @UseGuards(JwtGuard, RolesGuard)
+  @UseSecurity(Role.Admin)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   public deleteOneCategory(@Param('id', ParseIntPipe) id: number): Promise<void> {

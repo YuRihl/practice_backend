@@ -16,4 +16,18 @@ export class ProductCategory {
   @JoinColumn({ name: 'category_id' })
   public category!: Category;
 
+  public static from(data: Partial<ProductCategory>): ProductCategory {
+    const productCategory = new ProductCategory();
+
+    productCategory.id = data.id ?? 1;
+    productCategory.product = data.product ?? Product.from({});
+    productCategory.category = data.category ?? Category.from({});
+
+    return productCategory;
+  }
+
+  public static fromMany(data: Partial<ProductCategory>[]): ProductCategory[] {
+    return data.map(data => this.from(data));
+  }
+
 }
