@@ -17,7 +17,7 @@ export class CategoryServiceImpl extends CategoryService {
   }
 
   public async findOneCategory(id: number): Promise<Category> {
-    const category = await this.categoryRepository.findOneById({ id });
+    const category = await this.categoryRepository.findOneBy({ id });
     if (!category) throw new NotFoundException(`Category with ID ${id} not found`);
 
     return category;

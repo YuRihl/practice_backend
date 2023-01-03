@@ -62,7 +62,7 @@ export class PhotoServiceImpl extends PhotoService {
   }
 
   public async deletePhoto(id: number): Promise<void> {
-    const photo = await this.photoRepository.findOneById({ id });
+    const photo = await this.photoRepository.findOneBy({ id });
     if (!photo) throw new NotFoundException(`Photo with ID ${id} not found`);
 
     await this.photoRepository.remove(photo);
